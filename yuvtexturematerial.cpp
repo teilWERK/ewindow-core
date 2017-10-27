@@ -59,6 +59,7 @@ const char* YUVTextureMaterialShader::fragmentShader() const {
 
 void YUVTextureMaterialShader::updateState(const RenderState &state, QSGMaterial *newEffect, QSGMaterial *oldEffect)
 {
+    qInfo() << "Shader update state ??????????????????????";
     Q_ASSERT(oldEffect == 0 || newEffect->type() == oldEffect->type());
     YUVTextureMaterial *tx = static_cast<YUVTextureMaterial *>(newEffect);
     YUVTextureMaterial *oldTx = static_cast<YUVTextureMaterial *>(oldEffect);
@@ -128,10 +129,14 @@ void YUVTextureMaterial::setVTexture(QOpenGLTexture *texture)
 
 int YUVTextureMaterial::compare(const QSGMaterial *o) const
 {
+    qInfo("texmaterial compare");
     Q_ASSERT(o && type() == o->type());
     const YUVTextureMaterial *other = static_cast<const YUVTextureMaterial *>(o);
 
+    if (!m_ytexture || !other->ytexture()) return -1;
     // HACK: This is no proper compare, color channels are ignored
     int diff = m_ytexture->textureId() - other->ytexture()->textureId();
+
+    qInfo() << "texmaterial compare" << diff;
     return diff;
 }

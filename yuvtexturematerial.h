@@ -15,8 +15,6 @@ public:
     QSGMaterialShader *createShader() const override;
     int compare(const QSGMaterial *other) const override;
 
-    //void setYTexture(QSGTexture *texture);
-    //QSGTexture *ytexture() const { return m_ytexture; }
     void setYTexture(QOpenGLTexture *texture);
     QOpenGLTexture *ytexture() const { return m_ytexture; }
 
