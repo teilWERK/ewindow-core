@@ -47,6 +47,9 @@ public:
 
         QOpenGLTexture::Target target = QOpenGLTexture::Target2D;
 
+        //QImage img = QImage("test.png");
+        //m_ytex = new QOpenGLTexture(img);
+
         m_ytex = new QOpenGLTexture(target);
         m_ytex->setFormat(format);
         m_ytex->setSize(w, h);
@@ -89,6 +92,16 @@ public:
 
     ~BaresipVidisp() {
         qWarning() << "BaresipVidisp destroyed !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!";
+
+        delete m_geometry;
+        delete m_material;
+
+        delete m_ytex;
+        delete m_utex;
+        delete m_vtex;
+
+        delete m_context;
+        delete m_surface;
     }
 
 signals:
@@ -100,7 +113,7 @@ protected:
 
     QSGNode* updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *updatePaintNodeData)
     {
-        qInfo() << "updatePaintNode";
+        //qInfo() << "updatePaintNode" << boundingRect();
         if (!m_surface) {
             m_surface = new QOffscreenSurface();
             m_surface->setFormat(window()->format());
@@ -134,18 +147,14 @@ protected:
         QSGGeometryNode* n = static_cast<QSGGeometryNode*>(oldNode);
         if (!n) {
             n = new QSGGeometryNode();
-            //QSGGeometry::updateTexturedRectGeometry(m_geometry, boundingRect(), QRectF(0, 0, 1, 1));
-            //n->setFlag(QSGGeometryNode::OwnsGeometry);
-            //n->setFlag(QSGGeometryNode::OwnsMaterial);
-
             n->setMaterial(m_material);
             n->setGeometry(m_geometry);
         }
 
         QSGGeometry::updateTexturedRectGeometry(m_geometry, boundingRect(), QRectF(0, 0, 1, 1));
-        //n->setGeometry(m_geometry);
 
-        n->markDirty(QSGNode::DirtyMaterial);
+        //n->markDirty(QSGNode::DirtyMaterial);
+        update();
 
         return n;
     }
@@ -161,7 +170,7 @@ protected:
 
         if (!m_ytex) createTextures(vf->size.w, vf->size.h);
 
-        qInfo() << "uploading texture";
+        //qInfo() << "uploading texture";
         m_ytex->setData(QOpenGLTexture::Luminance, QOpenGLTexture::UInt8, (const void*)vf->data[0]);
         m_utex->setData(QOpenGLTexture::Luminance, QOpenGLTexture::UInt8, (const void*)vf->data[1]);
         m_vtex->setData(QOpenGLTexture::Luminance, QOpenGLTexture::UInt8, (const void*)vf->data[2]);
@@ -184,7 +193,7 @@ public:
     {
         qInfo() << "vidisp_alloc: ";
 
-        _vidisp_st* st = (_vidisp_st*) mem_zalloc(sizeof(_vidisp_st), 0);
+        _vidisp_st* st = (_vidisp_st*) mem_zalloc(sizeof(_vidisp_st), destroy);
         *vp = (vidisp_st*)st;
 
         st->vd = vd;
@@ -197,9 +206,15 @@ public:
     static int display(struct vidisp_st *st, const char *title,
                                const struct vidframe *bsframe)
     {
+        //qInfo() << "display" << title << bsframe->linesize[0];
         _vidisp_st* vst = (_vidisp_st*) st;
         vst->vidisp->uploadTexture(bsframe);
 
+    }
+
+    static void destroy(void* arg) {
+        struct _vidisp_st* st = (_vidisp_st*) arg;
+        delete st->vidisp;
     }
 };
 
