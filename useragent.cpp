@@ -28,3 +28,12 @@ void UserAgent::accept(Call c) {
 void UserAgent::hangup(Call c) {
     ua_hangup(uag_current(), c, 0, 0);
 }
+
+// Workaround for presence module not noticing new presence
+// Note: will only work with statically built libbaresip
+extern "C" void notifier_update_status(ua*);
+
+void UserAgent::setPresence(int status) {
+    ua_presence_status_set(uag_current(), (::presence_status)status);
+    notifier_update_status(uag_current());
+}

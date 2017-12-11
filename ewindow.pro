@@ -1,6 +1,6 @@
 TEMPLATE = app
 
-QT += qml quick multimedia
+QT += qml quick
 CONFIG += c++11 debug
 
 INCLUDEPATH += /usr/local/include/re /usr/local/include/rem
@@ -43,3 +43,8 @@ HEADERS += \
     contactlistmodel.h \
     useragent.h \
     baresipcore.h
+
+DISTFILES += \
+    main.qml \
+    ContactList.qml \
+    TimeoutDialog.qml

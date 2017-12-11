@@ -5,12 +5,10 @@ import org.ewindow 0.1
 //import org.ewindow.phone 0.1 as PhoneBackend
 
 Window {
-	visible: true
-	width: 640
-	height: 480
-    color: "blue"
-
     id: mainWindow
+    visible: true
+    width: 640
+    height: 480
 
     Rectangle {
         id: videoContainer
@@ -24,16 +22,8 @@ Window {
     Connections {
         target: baresipCore
         onNewVideo: {
-            console.info("NEW VIDEO! HOORAY!! \o/")
             video.parent = videoContainer
-            video.anchors.parent = videoContainer
-            /*
-            video.x = 100
-            video.y = 100
-            video.width = 500
-            video.height = 400
-            */
-
+            video.anchors.fill = videoContainer
             video.width = videoContainer.width
             video.height = videoContainer.height
         }
@@ -41,27 +31,53 @@ Window {
 
     UserAgent {
         id: ua
-        onRinging: { console.info("RINGING!!!", call) }
+
+        property var currentCall: null
+
+        onCurrentCallChanged: {
+            console.info(ContactListModel.PRESENCE_BUSY)
+            setPresence(currentCall ? ContactListModel.PRESENCE_BUSY : ContactListModel.PRESENCE_OPEN)
+        }
+
+        onRinging: {
+            console.info("RINGING!!!", call)
+        }
         onIncoming: {
             console.info("INCOMING!!!", call)
-            console.info("accepting call...")
             ua.accept(call)
-
+            if (!currentCall) {
+                console.info("accepting call...")
+                ua.accept(call)
+            } else {
+                // call dialog
+            }
         }
-        /*onConnected: {}
-        onHold: {}
-        onDisconnected: {}
-        onInterrupted: {}
-        */
+
+        onConnected: {
+            console.info("CONNECTED!!!", call)
+            currentCall = call
+        }
+
+        onDisconnected: {
+            console.info("DISCONNECTED!!!", call)
+            currentCall = null
+        }
+
+        onInterrupted: {
+            console.info("INTERRUPTED?!?", call)
+        }
     }
 
+    TimeoutDialog {
+        id: timeoutDialog
+    }
 
-    /*
+    /// Timer for Vidloop testing
     Timer {
-        interval: 2400
-        running: true
-        repeat: true
+        interval: 5400
 
+        //running: true
+        repeat: true
         property bool vl: false
         onTriggered: {
             console.info("timer triggered")
@@ -72,36 +88,86 @@ Window {
                 ua.startVidloop();
             else ua.stopVidloop();
 
+            timeoutDialog.show()
+
+            /*
+            if (!vl)
+                ua.startVidloop()
+            else
+                ua.stopVidloop()
+                */
             vl = !vl
         }
     }
-    */
+    
+    TimeoutDialog {
+        id: contactListDialog
+        onNext: contactList.selectNext()
 
-    ContactList {
-        model: contactListModel
-
-        onContactSelected: {
-           console.info("delegate ENTER PRESSED. connecting to uri", uri)
-           ua.connect(uri)
+        onTimeout: {
+            keyFocusItem.focus = true
+            // hide()
         }
-    }
 
-    /*
-    Component {
-        id: highlight
-        Rectangle {
-            id: rooot
-            width: 180; height: 20
-            color: ListView.isCurrentItem ? "black" : "red"; radius: 5
-            y: list.currentItem.y
-            Behavior on y {
-                SpringAnimation {
-                    spring: 3
-                    damping: 0.2
-                }
+        onAction: {
+            hide()
+            var uri = contactList.getCurrentURI()
+            if (!uri) {
+                console.error("Fix the contactlist select bug")
+                return
             }
+
+            console.info("selection complete, connecting to ", uri)
+
+            callConfirmation.dname = uri
+            callConfirmation.uri = uri
+            callConfirmation.show()
+        }
+
+        ContactList {
+            id: contactList
+            model: contactListModel
+            visible: true
+        }
+
+        Keys.onPressed: {
+            console.info("TimeoutDialog parent Keys.onPressed")
+            show()
         }
     }
-    */
 
+    TimeoutDialog {
+        id: callConfirmation
+
+        property string dname: "null"
+        property string uri
+
+        Text {
+            font.pointSize: 36
+            text: " Do you really want to call %s ?\n Press Button to confirm".arg(
+                      "foo")
+            //parent.dname)
+        }
+
+        onAction: {
+            // hide() // Which Function is this? doesn't even exist
+            console.warn("Not connecting to", uri)
+            //ua.connect(uri)
+        }
+
+        onVisibleChanged: {
+            if (!visible)
+                keyFocusItem.visible = true
+        }
+    }
+
+    Item {
+        id: keyFocusItem
+        focus: true
+
+        Keys.onPressed: {
+            console.info("Window Keys.onPressed")
+            contactListDialog.show()
+        }
+    }
 }

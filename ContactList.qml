@@ -1,25 +1,45 @@
 import QtQuick 2.7
 import QtGraphicalEffects 1.0
 
-Rectangle {
-    border.color: "lightgrey"
-    color: "grey"
-    border.width: 2
-    //opacity: 0.77
+import org.ewindow 0.1
 
-    width: parent.width - 100
-    height: parent.height - 100
+ListView {
+    model: parent.model
+    anchors.fill: parent
+
+    id: listView
+
+    clip: true
+
+    delegate: contactDelegate
+
+    highlight: Rectangle {
+        color: "blue"
+        radius: 5
+    }
+
+    function selectNext() {
+        var view = listView
+        console.info(view.currentIndex, view.count)
+        if (view.currentIndex + 1 >= view.count) {
+            view.currentIndex = 0
+        } else {
+            view.currentIndex++
+        }
+    }
+
+    function getCurrentURI() {
+        var row = listView.currentIndex
+        if (row == -1)
+            return null
+        var idx = model.index(row, 0)
+        var dat = model.data(idx, ContactListModel.URIRole)
+        return dat
+    }
 
     anchors.centerIn: parent
 
-    radius: 10
-
-    signal contactSelected(string uri)
-
-    //property model: null
-    property var model: null;
-
-    OpacityAnimator on opacity{
+    OpacityAnimator on opacity {
         id: fadeIn
         from: 0
         to: .55
@@ -74,7 +94,7 @@ Rectangle {
                 //anchors.centerIn: parent
                 anchors.verticalCenter: parent.verticalCenter
                 //anchors.horizontalCenter: parent
-                source: logo
+                //source: logo
                 x: 30
                 height: 90
                 width: height
@@ -107,62 +127,4 @@ Rectangle {
         }
     }
 
-    ListView {
-        model: parent.model
-        id: listView
-        anchors.fill: parent
-
-        clip: true
-
-        delegate: contactDelegate
-
-        highlight: Rectangle { color: "lightsteelblue"; radius: 5 }
-        focus: true
-    }
-
 }
-
-
-    /*
-    Rectangle {
-
-                       Component {
-                           id: highlight
-                           Rectangle {
-                               id: rooot
-                               width: 180; height: 20
-                               color: ListView.isCurrentItem ? "black" : "red"; radius: 5
-                               y: list.currentItem.y
-                               Behavior on y {
-                                   SpringAnimation {
-                                       spring: 3
-                                       damping: 0.2
-                                   }
-                               }
-                           }
-                       }
-                            Component {
-                                id: contactDelegate
-                                Item {
-                                    width: 180; height: 40
-                                    Column {
-                                        Text { text: '<b>Name:</b> ' + dname }
-                                        Text { text: '<b>URI:</b> ' + uri }
-                                        Text { text: '<b>Presence:</b> ' + presence }
-                                    }
-                                    MouseArea {
-                                       anchors.fill: parent
-                                       onClicked: listView.currentIndex = index
-                                   }
-
-                                    Keys.onReturnPressed: {
-                                        console.info("delegate ENTER PRESSED. connecting to uri", uri)
-                                        ua.connect(uri)
-                                    }
-                                }
-                            }
-
-                   }
-
-                   }
-    */
