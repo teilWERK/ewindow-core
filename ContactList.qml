@@ -1,5 +1,4 @@
 import QtQuick 2.7
-import QtGraphicalEffects 1.0
 
 import org.ewindow 0.1
 
@@ -99,18 +98,6 @@ ListView {
                 height: 90
                 width: height
             }
-
-            Colorize {
-                anchors.fill: idLogo
-                source: idLogo
-                hue: 0
-                lightness: 0
-                saturation: 0
-
-                //visible: !available
-                visible: presence != 1
-            }
-
 
             Text {
                 text: dname
