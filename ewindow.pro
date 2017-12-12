@@ -8,7 +8,8 @@ SOURCES += main.cpp \
     yuvtexturematerial.cpp \
     contactlistmodel.cpp \
     useragent.cpp \
-    baresipcore.cpp
+    baresipcore.cpp \
+    baresipvidisp.h baresipvidisp.cpp
 
 #LIBS += -lre -lbaresip
 LIBS += -lbaresip -lre

@@ -30,10 +30,7 @@ void BaresipCore::run()
 
     // TODO: overwrite some basic conf/settings, like video_display?
 
-    struct vidisp* st;
-    ret = vidisp_register(&st, baresip_vidispl(), "qtupload",
-                    BaresipVidisp::alloc, 0, BaresipVidisp::display, 0);
-    qInfo() << "vidisp_register " << ret;
+	BaresipVidisp::register_vidisp();
 
 //        tmr_init(&m_timer);
 //        tmr_start(&m_timer, 100, re_callback, this);
