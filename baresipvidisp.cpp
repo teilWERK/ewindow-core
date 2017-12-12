@@ -75,7 +75,6 @@ void BaresipVidisp::createTextures(int w, int  h)
 
 QSGNode* BaresipVidisp::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *updatePaintNodeData)
 {
-	//qInfo() << "updatePaintNode" << boundingRect();
 	if (!m_surface) {
 		m_surface = new QOffscreenSurface();
 		m_surface->setFormat(window()->format());
@@ -113,7 +112,7 @@ QSGNode* BaresipVidisp::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *u
 		n->setGeometry(m_geometry);
 	}
 
-	QSGGeometry::updateTexturedRectGeometry(m_geometry, boundingRect(), QRectF(0, 0, 1, 1));
+	//QSGGeometry::updateTexturedRectGeometry(m_geometry, boundingRect(), QRectF(0, 0, 1, 1));
 
 	//n->markDirty(QSGNode::DirtyMaterial);
 	update();
@@ -129,13 +128,16 @@ void BaresipVidisp::uploadTexture(const vidframe* vf) {
 
 	m_context->makeCurrent(m_surface);
 
-	if (!m_ytex) createTextures(vf->size.w, vf->size.h);
+	if (!m_ytex) createTextures(vf->linesize[0], vf->size.h);
 
 	//qInfo() << "uploading texture";
 	m_ytex->setData(QOpenGLTexture::Luminance, QOpenGLTexture::UInt8, (const void*)vf->data[0]);
 	m_utex->setData(QOpenGLTexture::Luminance, QOpenGLTexture::UInt8, (const void*)vf->data[1]);
 	m_vtex->setData(QOpenGLTexture::Luminance, QOpenGLTexture::UInt8, (const void*)vf->data[2]);
 
+	float x_scale = float(vf->size.w) / float(vf->linesize[0]);
+	QSGGeometry::updateTexturedRectGeometry(m_geometry, boundingRect(), QRectF(0, 0, x_scale, 1));
+	
 	// TODO: This is ineffective
 	//update();
 }
