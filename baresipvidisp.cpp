@@ -15,7 +15,6 @@ BaresipVidisp::BaresipVidisp()
 {
 	qInfo("BaresipVidisp constructor");
 	setFlag(ItemHasContents);
-
 	m_context = 0;
 	m_surface = 0;
 	m_ytex = 0;
@@ -33,7 +32,8 @@ BaresipVidisp::~BaresipVidisp()
 	delete m_geometry;
 	delete m_material;
 
-	m_context->makeCurrent(0);
+	// TODO: check for possible race condition with ::display? 
+	m_context->makeCurrent(m_surface);
 
 	delete m_ytex;
 	delete m_utex;
@@ -41,8 +41,6 @@ BaresipVidisp::~BaresipVidisp()
 
 	delete m_context;
 	delete m_surface;
-
-	m_context->doneCurrent();
 }
 
 void BaresipVidisp::createTextures(int w, int  h)
@@ -91,8 +89,6 @@ void BaresipVidisp::createTextures(int w, int  h)
 QSGNode* BaresipVidisp::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *updatePaintNodeData)
 {
 	(void)updatePaintNodeData;
-	
-	
 	if (!m_surface) {
 		m_surface = new QOffscreenSurface();
 		m_surface->setFormat(window()->format());
@@ -154,8 +150,11 @@ void BaresipVidisp::uploadTexture(const vidframe* vf) {
 	float x_scale = float(vf->size.w) / float(vf->linesize[0]);
 	QSGGeometry::updateTexturedRectGeometry(m_geometry, boundingRect(), QRectF(0, 0, x_scale, 1));
 	
+	m_context->doneCurrent();
+	
 	// TODO: This is ineffective
 	//update();
+	QMetaObject::invokeMethod(window(), "update", Qt::QueuedConnection);
 }
 
 
