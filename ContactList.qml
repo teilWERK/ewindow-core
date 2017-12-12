@@ -31,6 +31,8 @@ ListView {
         var row = listView.currentIndex
         if (row == -1)
             return null
+
+        console.log("getCurrentURI")
         var idx = model.index(row, 0)
         var dat = model.data(idx, ContactListModel.URIRole)
         return dat
@@ -66,13 +68,10 @@ ListView {
     Component {
         id: contactDelegate
         Rectangle {
-            //color: "white"
             border.width: 3
             height: 100
             width: parent.width
             clip: true
-
-            opacity: 1
 
             MouseArea {
                anchors.fill: parent
@@ -97,6 +96,17 @@ ListView {
                 x: 30
                 height: 90
                 width: height
+            }
+
+            Rectangle {
+				anchors.verticalCenter: parent.verticalCenter
+				x: y
+				width: parent.height / 4
+				height: width
+				radius: width
+
+				color: presence === ContactListModel.PRESENCE_OPEN ? "green" : "red"
+				//color: presence === 1 ? "green" : "red"
             }
 
             Text {
