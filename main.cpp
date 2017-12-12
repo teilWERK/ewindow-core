@@ -23,38 +23,43 @@ extern "C" {
 
 int main(int argc, char *argv[])
 {
-    QGuiApplication::setAttribute(Qt::AA_UseOpenGLES);
-    QGuiApplication app(argc, argv);
+	// Try EGLFS when X server not present
+	if (!getenv("DISPLAY")) {
+		setenv("QT_QPA_PLATFORM", "eglfs", 0);
+	}
 
-    if (!QOpenGLContext::supportsThreadedOpenGL()) {
-        qInfo("Platform has no GL threading support!!!");
-        //exit(1);
-    }
+	QGuiApplication::setAttribute(Qt::AA_UseOpenGLES);
+	QGuiApplication app(argc, argv);
 
-    BaresipCore::instance().start();
-    QQmlApplicationEngine engine;
+	if (!QOpenGLContext::supportsThreadedOpenGL()) {
+		qInfo("Platform has no GL threading support!!!");
+		//exit(1);
+	}
 
-    ContactListModel clModel;
+	BaresipCore::instance().start();
+	QQmlApplicationEngine engine;
 
-    //qmlRegisterInterface<Call>("Call");
-    qRegisterMetaType<Call>();
+	ContactListModel clModel;
 
-    engine.rootContext()->setContextProperty("contactListModel", &clModel);
-    engine.rootContext()->setContextProperty("baresipCore", &BaresipCore::instance());
+	//qmlRegisterInterface<Call>("Call");
+	qRegisterMetaType<Call>();
 
-    //qmlRegisterType<BaresipCore>("org.ewindow", 0, 1, "BaresipCore");
-    qmlRegisterInterface<BaresipCore>("BaresipCore");
+	engine.rootContext()->setContextProperty("contactListModel", &clModel);
+	engine.rootContext()->setContextProperty("baresipCore", &BaresipCore::instance());
 
-    //qmlRegisterSingletonType<BaresipThread>("org.ewindow.phone", 0, 1, "PhoneBackend", baresipthread_singleton_provider);
-    //qmlRegisterSingletonType<BaresipThread>("org.ewindow.phone", 0, 1, "PhoneBackend", 0);
-    qmlRegisterType<UserAgent>("org.ewindow", 0, 1, "UserAgent");
-    qmlRegisterUncreatableType<BaresipVidisp>("org.ewindow", 0, 1, "VideoDisplay", "VideoDisplay is created by the backend, use the onNewVideo callback");
-    //qmlRegisterInterface<BaresipVidisp>("VideoDisplay");
-    qmlRegisterUncreatableType<ContactListModel>("org.ewindow", 0, 1, "ContactListModel", "ContactListModel is passed by the application through 'contactListModel'");
+	//qmlRegisterType<BaresipCore>("org.ewindow", 0, 1, "BaresipCore");
+	qmlRegisterInterface<BaresipCore>("BaresipCore");
 
-    engine.load(QUrl(QStringLiteral("./main.qml")));
+	//qmlRegisterSingletonType<BaresipThread>("org.ewindow.phone", 0, 1, "PhoneBackend", baresipthread_singleton_provider);
+	//qmlRegisterSingletonType<BaresipThread>("org.ewindow.phone", 0, 1, "PhoneBackend", 0);
+	qmlRegisterType<UserAgent>("org.ewindow", 0, 1, "UserAgent");
+	qmlRegisterUncreatableType<BaresipVidisp>("org.ewindow", 0, 1, "VideoDisplay", "VideoDisplay is created by the backend, use the onNewVideo callback");
+	//qmlRegisterInterface<BaresipVidisp>("VideoDisplay");
+	qmlRegisterUncreatableType<ContactListModel>("org.ewindow", 0, 1, "ContactListModel", "ContactListModel is passed by the application through 'contactListModel'");
+
+	engine.load(QUrl(QStringLiteral("./main.qml")));
 	if (engine.rootObjects().isEmpty())
-        return -1;
+		return -1;
 
-    return app.exec();
-}
+	return app.exec();
+	}
