@@ -50,6 +50,7 @@ int main(int argc, char *argv[])
     qmlRegisterType<UserAgent>("org.ewindow", 0, 1, "UserAgent");
     qmlRegisterUncreatableType<BaresipVidisp>("org.ewindow", 0, 1, "VideoDisplay", "VideoDisplay is created by the backend, use the onNewVideo callback");
     //qmlRegisterInterface<BaresipVidisp>("VideoDisplay");
+    qmlRegisterUncreatableType<ContactListModel>("org.ewindow", 0, 1, "ContactListModel", "ContactListModel is passed by the application through 'contactListModel'");
 
     engine.load(QUrl(QStringLiteral("./main.qml")));
 	if (engine.rootObjects().isEmpty())
