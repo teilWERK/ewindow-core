@@ -86,9 +86,8 @@ void BaresipVidisp::createTextures(int w, int  h)
 }
 
 
-QSGNode* BaresipVidisp::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *updatePaintNodeData)
+QSGNode* BaresipVidisp::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData*)
 {
-	(void)updatePaintNodeData;
 	if (!m_surface) {
 		m_surface = new QOffscreenSurface();
 		m_surface->setFormat(window()->format());
@@ -122,11 +121,11 @@ QSGNode* BaresipVidisp::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *u
 		n = new QSGGeometryNode();
 		n->setMaterial(m_material);
 		n->setGeometry(m_geometry);
+		QSGGeometry::updateTexturedRectGeometry(m_geometry, boundingRect(), QRectF(0, 0, 1, 1));
 	}
 
-	//QSGGeometry::updateTexturedRectGeometry(m_geometry, boundingRect(), QRectF(0, 0, 1, 1));
-
-	//n->markDirty(QSGNode::DirtyMaterial);
+	n->markDirty(QSGNode::DirtyMaterial);
+	n->markDirty(QSGNode::DirtyGeometry);
 	update();
 
 	return n;
@@ -149,12 +148,8 @@ void BaresipVidisp::uploadTexture(const vidframe* vf) {
 
 	float x_scale = float(vf->size.w) / float(vf->linesize[0]);
 	QSGGeometry::updateTexturedRectGeometry(m_geometry, boundingRect(), QRectF(0, 0, x_scale, 1));
-	
+
 	m_context->doneCurrent();
-	
-	// TODO: This is ineffective
-	//update();
-	QMetaObject::invokeMethod(window(), "update", Qt::QueuedConnection);
 }
 
 
