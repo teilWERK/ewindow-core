@@ -1,17 +1,8 @@
 #ifndef BARESIPVIDISP_H
 #define BARESIPVIDISP_H
 
-#include <QDebug>
-
 #include <QQuickItem>
-#include <QQuickWindow>
-#include <QCoreApplication>
 
-#include <QOpenGLTexture>
-#include <QOpenGLContext>
-#include <QOffscreenSurface>
-
-#include "yuvtexturematerial.h"
 
 #include "baresipcore.h"
 
@@ -19,7 +10,12 @@
 #include <rem.h>
 #include <baresip.h>
 
-class QAbstractVideoSurface;
+class YUVTextureMaterial;
+
+class QSGGeometry;
+class QOpenGLContext;
+class QOpenGLTexture;
+class QOffscreenSurface;
 
 class BaresipVidisp : public QQuickItem {
     Q_OBJECT

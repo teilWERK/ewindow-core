@@ -59,7 +59,7 @@ const char* YUVTextureMaterialShader::fragmentShader() const {
 
 void YUVTextureMaterialShader::updateState(const RenderState &state, QSGMaterial *newEffect, QSGMaterial *oldEffect)
 {
-    qInfo() << "Shader update state ??????????????????????";
+    //qInfo() << "Shader update state ??????????????????????";
     Q_ASSERT(oldEffect == 0 || newEffect->type() == oldEffect->type());
     YUVTextureMaterial *tx = static_cast<YUVTextureMaterial *>(newEffect);
     YUVTextureMaterial *oldTx = static_cast<YUVTextureMaterial *>(oldEffect);

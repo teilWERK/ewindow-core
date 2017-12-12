@@ -1,5 +1,16 @@
 #include "baresipvidisp.h"
 
+#include "yuvtexturematerial.h"
+
+#include <QDebug>
+
+#include <QQuickWindow>
+#include <QSGGeometryNode>
+
+#include <QOpenGLTexture>
+#include <QOpenGLContext>
+#include <QOffscreenSurface>
+
 BaresipVidisp::BaresipVidisp()
 {
 	qInfo("BaresipVidisp constructor");
@@ -75,6 +86,9 @@ void BaresipVidisp::createTextures(int w, int  h)
 
 QSGNode* BaresipVidisp::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *updatePaintNodeData)
 {
+	(void)updatePaintNodeData;
+	
+	
 	if (!m_surface) {
 		m_surface = new QOffscreenSurface();
 		m_surface->setFormat(window()->format());
@@ -101,8 +115,6 @@ QSGNode* BaresipVidisp::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *u
 
 		qInfo() << "re-bind successful: " << ret;
 		if (!ret) exit(1);
-
-		QCoreApplication::setAttribute(Qt::AA_DontCheckOpenGLContextThreadAffinity);
 	}
 
 	QSGGeometryNode* n = static_cast<QSGGeometryNode*>(oldNode);
@@ -155,7 +167,10 @@ int BaresipVidisp::alloc(struct vidisp_st **vp,
             const char *dev,
             vidisp_resize_h *resizeh, void *arg)
 {
-	qInfo() << "vidisp_alloc: ";
+	(void)resizeh;
+	(void)dev;
+	(void)prm;
+	(void)arg;
 
 	_vidisp_st* st = (_vidisp_st*) mem_zalloc(sizeof(_vidisp_st), destroy);
 	*vp = (vidisp_st*)st;
@@ -170,10 +185,12 @@ int BaresipVidisp::alloc(struct vidisp_st **vp,
 int BaresipVidisp::display(struct vidisp_st *st, const char *title,
 						   const struct vidframe *bsframe)
 {
+	(void)title;
 	//qInfo() << "display" << title << bsframe->linesize[0];
 	_vidisp_st* vst = (_vidisp_st*) st;
 	vst->vidisp->uploadTexture(bsframe);
 
+	return 0;
 }
 
 void BaresipVidisp::destroy(void* arg) {

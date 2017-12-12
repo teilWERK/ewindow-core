@@ -3,7 +3,7 @@
 #include <QQmlContext>
 #include <QThread>
 
-#include <QQuickWindow>
+#include <QOpenGLContext>
 
 #include <QAbstractListModel>
 
