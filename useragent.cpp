@@ -2,16 +2,37 @@
 
 Q_DECLARE_METATYPE(Call);
 
-void UserAgent::ua_callback(ua *, ua_event event, call *c, const char *, void *arg) {
-    UserAgent* _this = (UserAgent*) arg;
+void UserAgent::ua_callback(ua *, ua_event event, call *c, const char *msg, void *arg) {
+	UserAgent* _this = (UserAgent*) arg;
 
-    switch (event) {
-        case UA_EVENT_CALL_INCOMING:
-            emit _this->incoming(c);
-            break;
-        case UA_EVENT_CALL_RINGING:
-            emit _this->ringing(c);
-            break;
+	switch (event) {
+		case UA_EVENT_CALL_INCOMING:
+			emit _this->incoming(c);
+			break;
+		case UA_EVENT_CALL_RINGING:
+			emit _this->ringing(c);
+			break;
+		case UA_EVENT_CALL_ESTABLISHED:
+			// HACK: Maybe not the best place to set this
+			call_enable_rtp_timeout(c, 4000);
+			emit _this->connected(c);
+			break;
+		case UA_EVENT_CALL_CLOSED:
+			if (strstr(msg, "rtp error")) {
+				emit _this->interrupted(c);
+			} else {
+				emit _this->disconnected(c);
+			}
+			break;
+		case UA_EVENT_CALL_PROGRESS:
+			qInfo() << "UA_EVENT_CALL_PROGRESS" << msg;
+			break;
+		default:
+			qInfo() << "UA_EVENT_OTHER" << event << msg;
+			break;
+    //    emit _this->disconnected(c);
+    //    break;
+
         //case UA_
     }
 }
