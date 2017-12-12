@@ -69,38 +69,6 @@ Window {
     }
 
     TimeoutDialog {
-        id: timeoutDialog
-    }
-
-    /// Timer for Vidloop testing
-    Timer {
-        interval: 5400
-
-        //running: true
-        repeat: true
-        property bool vl: false
-        onTriggered: {
-            console.info("timer triggered")
-            //ua.connect("strfry@[fde1:c0fe::4]")
-            //ua.connect("k-ot@[fde1:c0fe::c3d2]")
-
-            if (!vl)
-                ua.startVidloop();
-            else ua.stopVidloop();
-
-            timeoutDialog.show()
-
-            /*
-            if (!vl)
-                ua.startVidloop()
-            else
-                ua.stopVidloop()
-                */
-            vl = !vl
-        }
-    }
-    
-    TimeoutDialog {
         id: contactListDialog
         onNext: contactList.selectNext()
 
@@ -118,6 +86,9 @@ Window {
             }
 
             console.info("selection complete, connecting to ", uri)
+
+            ua.connect(uri);
+            return
 
             callConfirmation.dname = uri
             callConfirmation.uri = uri
@@ -169,5 +140,10 @@ Window {
             console.info("Window Keys.onPressed")
             contactListDialog.show()
         }
+    }
+
+    Component.onCompleted: {
+		// advertise the freshly started window as available
+		ua.setPresence(ContactListModel.PRESENCE_OPEN)
     }
 }

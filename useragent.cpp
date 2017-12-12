@@ -1,5 +1,7 @@
 #include "useragent.h"
 
+#include <QTimer>
+
 Q_DECLARE_METATYPE(Call);
 
 void UserAgent::ua_callback(ua *, ua_event event, call *c, const char *msg, void *arg) {
@@ -27,6 +29,11 @@ void UserAgent::ua_callback(ua *, ua_event event, call *c, const char *msg, void
 		case UA_EVENT_CALL_PROGRESS:
 			qInfo() << "UA_EVENT_CALL_PROGRESS" << msg;
 			break;
+#ifdef UA_EVENT_CALL_RTCP
+		case UA_EVENT_CALL_RTCP:
+			// Updated RTCP statistics (audio/video)
+			break;
+#endif
 		default:
 			qInfo() << "UA_EVENT_OTHER" << event << msg;
 			break;
@@ -55,6 +62,13 @@ void UserAgent::hangup(Call c) {
 extern "C" void notifier_update_status(ua*);
 
 void UserAgent::setPresence(int status) {
+	if (!uag_current()) {
+		qWarning() << "No user agent available yet, cannot set presence to" << presence_status(status);
+		QTimer::singleShot(1111, [=] {
+			setPresence(1);
+		});
+	}
+	
     ua_presence_status_set(uag_current(), (::presence_status)status);
     notifier_update_status(uag_current());
 }

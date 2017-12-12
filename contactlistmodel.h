@@ -20,6 +20,17 @@ public:
 
     Q_ENUMS(ContactRoles)
 
+    // Copy&Pasta from baresip.h
+
+    enum presence_status {
+        PRESENCE_UNKNOWN,
+        PRESENCE_OPEN,
+        PRESENCE_CLOSED,
+        PRESENCE_BUSY
+    };
+
+    Q_ENUMS(presence_status)
+
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
 
     QVariant data(const QModelIndex &index, int role) const override;
