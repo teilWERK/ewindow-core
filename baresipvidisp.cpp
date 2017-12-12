@@ -33,12 +33,16 @@ BaresipVidisp::~BaresipVidisp()
 	delete m_geometry;
 	delete m_material;
 
+	m_context->makeCurrent(0);
+
 	delete m_ytex;
 	delete m_utex;
 	delete m_vtex;
 
 	delete m_context;
 	delete m_surface;
+
+	m_context->doneCurrent();
 }
 
 void BaresipVidisp::createTextures(int w, int  h)
@@ -97,7 +101,7 @@ QSGNode* BaresipVidisp::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *u
 	}
 
 	if (!m_context) {
-		//QCoreApplication::setAttribute(Qt::AA_DontCheckOpenGLContextThreadAffinity);
+		QCoreApplication::setAttribute(Qt::AA_DontCheckOpenGLContextThreadAffinity);
 		qInfo() << "creating new context";
 		QOpenGLContext* current = window()->openglContext();
 		qInfo() << current->isValid();
