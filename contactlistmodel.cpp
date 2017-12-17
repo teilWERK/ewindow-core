@@ -7,9 +7,6 @@
 #include <baresip.h>
 
 void ContactListModel::update() {
-    QModelIndex topleft = createIndex(0, 0);
-    QModelIndex bottomright = createIndex(rowCount(), 3);
-
     //qInfo() << "ContactListModel::update" << rowCount() << topleft << bottomright;
     //emit dataChanged(topleft, bottomright);
 
@@ -29,9 +26,7 @@ ContactListModel::ContactListModel()
     connect(timer, SIGNAL(timeout()), this, SLOT(update()));
 
     timer->start(1000);
-
 }
-
 
 int ContactListModel::rowCount(const QModelIndex &parent) const
 {

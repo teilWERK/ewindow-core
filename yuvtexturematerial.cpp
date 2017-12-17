@@ -62,7 +62,8 @@ void YUVTextureMaterialShader::updateState(const RenderState &state, QSGMaterial
     //qInfo() << "Shader update state ??????????????????????";
     Q_ASSERT(oldEffect == 0 || newEffect->type() == oldEffect->type());
     YUVTextureMaterial *tx = static_cast<YUVTextureMaterial *>(newEffect);
-    YUVTextureMaterial *oldTx = static_cast<YUVTextureMaterial *>(oldEffect);
+    //YUVTextureMaterial *oldTx = static_cast<YUVTextureMaterial *>(oldEffect);
+    (void)oldEffect;
 
     QOpenGLTexture *y = tx->ytexture();
     QOpenGLTexture *u = tx->utexture();
