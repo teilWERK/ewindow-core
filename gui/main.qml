@@ -47,7 +47,6 @@ Window {
             }
 
             onAction: {
-                hide()
                 var uri = contactList.getCurrentURI()
                 if (!uri) {
                     console.error("Fix the contactlist select bug")
@@ -56,6 +55,8 @@ Window {
 
                 console.info("selection complete, connecting to ", uri)
                 Logic.make_connection(uri)
+                hide()
+                opacity = 0
             }
 
             ContactList {
