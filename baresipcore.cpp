@@ -4,6 +4,10 @@
 #include <re.h>
 #include <baresip.h>
 
+static void sighandler(int signal) {
+	exit(signal);
+}
+
 void BaresipCore::run()
 {
     //BaresipVidisp::m_vidisp->moveToThread(this);
@@ -35,5 +39,5 @@ void BaresipCore::run()
 //        tmr_init(&m_timer);
 //        tmr_start(&m_timer, 100, re_callback, this);
 
-    re_main(0);
+    re_main(sighandler);
 }
