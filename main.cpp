@@ -51,13 +51,12 @@ int main(int argc, char *argv[])
 	qmlRegisterInterface<BaresipCore>("BaresipCore");
 
 	//qmlRegisterSingletonType<BaresipThread>("org.ewindow.phone", 0, 1, "PhoneBackend", baresipthread_singleton_provider);
-	//qmlRegisterSingletonType<BaresipThread>("org.ewindow.phone", 0, 1, "PhoneBackend", 0);
-	qmlRegisterType<UserAgent>("org.ewindow", 0, 1, "UserAgent");
+	qmlRegisterSingletonType<UserAgent>("org.ewindow.ua", 0, 1, "UserAgent", &UserAgent::newInstance);
+	//qmlRegisterType<UserAgent>("org.ewindow", 0, 1, "UserAgent");
 	qmlRegisterUncreatableType<BaresipVidisp>("org.ewindow", 0, 1, "VideoDisplay", "VideoDisplay is created by the backend, use the onNewVideo callback");
-	//qmlRegisterInterface<BaresipVidisp>("VideoDisplay");
 	qmlRegisterUncreatableType<ContactListModel>("org.ewindow", 0, 1, "ContactListModel", "ContactListModel is passed by the application through 'contactListModel'");
 
-	engine.load(QUrl(QStringLiteral("./main.qml")));
+	engine.load(QUrl(QStringLiteral("gui/main.qml")));
 	if (engine.rootObjects().isEmpty())
 		return -1;
 

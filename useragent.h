@@ -8,6 +8,9 @@
 
 #include "contactlistmodel.h"
 
+class QQmlEngine;
+class QJSEngine;
+
 class Call {
     Q_GADGET
 
@@ -26,15 +29,28 @@ class UserAgent : public QQuickItem {
     static void ua_callback(struct ua*, ua_event, call*, const char*, void* arg);
 
 public:
+    // Copy&Pasta from baresip.h
+    enum presence_status {
+        PRESENCE_UNKNOWN,
+        PRESENCE_OPEN,
+        PRESENCE_CLOSED,
+        PRESENCE_BUSY
+    };
+
+    Q_ENUMS(presence_status)
+    
     UserAgent() {
         qInfo() << "UserAgent constructed";
-
         uag_event_register(ua_callback, this);
     }
 
     ~UserAgent() {
         uag_event_unregister(ua_callback);
     }
+
+    static QObject* newInstance(QQmlEngine*, QJSEngine*) {
+		return new UserAgent;
+	}
 
 signals:
     //void ringing(struct call* call);
