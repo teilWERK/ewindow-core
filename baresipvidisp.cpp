@@ -27,7 +27,7 @@ BaresipVidisp::BaresipVidisp()
 
 BaresipVidisp::~BaresipVidisp()
 {
-	qWarning() << "BaresipVidisp destroyed!";
+	qInfo() << "\e[35mBaresipVidisp::~BaresipVidisp()\e[m";
 
 	delete m_geometry;
 	delete m_material;
@@ -49,18 +49,15 @@ void BaresipVidisp::createTextures(int w, int  h)
 
 	qInfo() << "creating textures...";
 
+	// Workaround for GLES: Desktop GL has R8, GLES2 only Luminance
 	QOpenGLTexture::TextureFormat format = QOpenGLTexture::R8_UNorm;
-
-	qInfo() << "isgles" << m_context->isOpenGLES();
 	if (m_context->isOpenGLES())
 		format = QOpenGLTexture::LuminanceFormat;
+
 	QOpenGLTexture::PixelFormat pformat = QOpenGLTexture::Luminance;
 	QOpenGLTexture::PixelType ptype = QOpenGLTexture::UInt8;
 
 	QOpenGLTexture::Target target = QOpenGLTexture::Target2D;
-
-	//QImage img = QImage("test.png");
-	//m_ytex = new QOpenGLTexture(img);
 
 	m_ytex = new QOpenGLTexture(target);
 	m_ytex->setFormat(format);
@@ -193,5 +190,9 @@ int BaresipVidisp::display(struct vidisp_st *st, const char *title,
 
 void BaresipVidisp::destroy(void* arg) {
 	struct _vidisp_st* st = (_vidisp_st*) arg;
-	delete st->vidisp;
+	//delete st->vidisp;
+	qInfo() << "\e[35mBaresipVidisp::destroy\e[m";
+	
+	//st->vidisp->deleteLater();
+	QMetaObject::invokeMethod(st->vidisp, "deleteLater", Qt::QueuedConnection);
 }
