@@ -29,11 +29,9 @@ void UserAgent::ua_callback(ua *, ua_event event, call *c, const char *msg, void
 		case UA_EVENT_CALL_PROGRESS:
 			qInfo() << "UA_EVENT_CALL_PROGRESS" << msg;
 			break;
-#ifdef UA_EVENT_CALL_RTCP
 		case UA_EVENT_CALL_RTCP:
 			// Updated RTCP statistics (audio/video)
 			break;
-#endif
 		default:
 			qInfo() << "UA_EVENT_OTHER" << event << msg;
 			break;
