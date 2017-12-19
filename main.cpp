@@ -28,6 +28,9 @@ int main(int argc, char *argv[])
 		setenv("QT_QPA_PLATFORM", "eglfs", 0);
 	}
 
+	// Enable pulseaudio's echo-cancellation
+	setenv("PULSE_PROP", "filter.want=echo-cancel", 0);
+
 	QGuiApplication::setAttribute(Qt::AA_UseOpenGLES);
 	QGuiApplication app(argc, argv);
 
