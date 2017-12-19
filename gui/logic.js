@@ -34,6 +34,16 @@ ua.onInterrupted.connect(function(call) {
 	console.info("Call was interrupted, re-dialing ", call)
 })
 
+ua.onDisconnected.connect(function(call) {
+	console.info("Disconnected from ", call)
+
+	// A denied call also counts as 'disconnected'
+	if (call == currentCall) {
+		currentCall = null
+		ua.setPresence(ua.PRESENCE_OPEN)
+	}
+})
+
 
 function make_connection(uri) {
 	if (currentCall) {
