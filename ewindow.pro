@@ -21,7 +21,7 @@ HEADERS += \
 
 
 LIBS += -Lre -Lrem -Lbaresip
-LIBS += -lre -lrem -lbaresip -lssl -lcrypto
+LIBS += -lbaresip -lrem -lre -lssl -lcrypto -ldl -lz
 
 # Installation: Build ewindow binary and libbaresip.so
 INSTALLS += ewindow libbaresip
@@ -56,4 +56,4 @@ git.commands = \
 
 
 PRE_TARGETDEPS += baresip/libbaresip.so
-QMAKE_EXTRA_TARGETS += re rem libbaresip
+QMAKE_EXTRA_TARGETS += git re rem libbaresip
