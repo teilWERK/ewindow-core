@@ -31,7 +31,7 @@ ewindow.path = /opt/ewindow
 ewindow.files = ewindow gui
 ewindow.depends = baresip/libbaresip.so
 
-QMAKE_RPATHDIR += . # Adjust rpath so so binary will find libbaresip.so
+QMAKE_RPATHDIR += . baresip # Adjust rpath so so binary will find libbaresip.so
 
 # Build static versions of re/rem, so we don't have to deal with more .so's
 re.target = re/libre.a

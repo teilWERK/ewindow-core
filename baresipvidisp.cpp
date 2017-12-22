@@ -2,6 +2,7 @@
 
 #include "yuvtexturematerial.h"
 
+#include <QCoreApplication>
 #include <QDebug>
 
 #include <QQuickWindow>
@@ -172,6 +173,7 @@ int BaresipVidisp::alloc(struct vidisp_st **vp,
 
 	st->vd = vd;
 	st->vidisp = new BaresipVidisp();
+	st->vidisp->moveToThread(QCoreApplication::instance()->thread());
 
 	emit BaresipCore::instance().newVideo(st->vidisp);
 	return 0;
