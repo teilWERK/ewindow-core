@@ -3,7 +3,8 @@ Section: comm
 Priority: optional
 Maintainer: Jonathan Sieber <mail@strfry.org>
 Build-Depends: debhelper (>= 9), qtbase5-dev, qtbase5-dev-tools, qt5-qmake,
-	libx264-dev, libopus-dev, libavcodec-dev, libavahi-client-dev, libvpx-dev, libssl-dev,
+	libssl1.0-dev | libssl-dev,
+	libx264-dev, libopus-dev, libavcodec-dev, libavahi-client-dev, libvpx-dev,
 	libpulse-dev, libasound2-dev, git
 Standards-Version: 3.9.6
 Homepage: https://ewindow.org
@@ -11,7 +12,9 @@ Homepage: https://ewindow.org
 
 Package: ewindow
 Architecture: any
-Depends: libqt5gui5, libqt5widgets5, libqt5core5a, ${misc:Depends}, ${shlibs:Depends}
+Depends: libqt5gui5, libqt5widgets5, libqt5core5a,
+	qml-module-qtquick2, qml-module-qtquick-window2,
+	${misc:Depends}, ${shlibs:Depends}
 Description: EWindow Video Communication software
    The EWindow is a video chat device that runs 24/7 in a shared space.
    The goal is a decentralized, secure 24/7 audiovisual communication system.
