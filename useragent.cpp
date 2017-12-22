@@ -1,5 +1,7 @@
 #include "useragent.h"
 
+#include "re.h"
+
 #include <QTimer>
 
 Q_DECLARE_METATYPE(Call);
@@ -43,16 +45,22 @@ void UserAgent::ua_callback(ua *, ua_event event, call *c, const char *msg, void
 }
 
 void UserAgent::connect(QString target_uri) {
+	re_thread_enter();
     struct call* callp;
     ua_connect(uag_current(), &callp, 0, target_uri.toLatin1().data(), 0, VIDMODE_ON);
+    re_thread_leave();
 }
 
 void UserAgent::accept(Call c) {
+	re_thread_enter();
     ua_answer(uag_current(), c);
+    re_thread_leave();
 }
 
 void UserAgent::hangup(Call c) {
+	re_thread_enter();
     ua_hangup(uag_current(), c, 0, 0);
+    re_thread_leave();
 }
 
 // Workaround for presence module not noticing new presence
@@ -63,10 +71,13 @@ void UserAgent::setPresence(int status) {
 	if (!uag_current()) {
 		qWarning() << "No user agent available yet, cannot set presence to" << presence_status(status);
 		QTimer::singleShot(1111, [=] {
-			setPresence(1);
+			setPresence(status);
 		});
+		return;
 	}
 	
-    ua_presence_status_set(uag_current(), (::presence_status)status);
-    notifier_update_status(uag_current());
+	//re_thread_enter();
+	ua_presence_status_set(uag_current(), (::presence_status)status);
+	notifier_update_status(uag_current());
+	//re_thread_leave();
 }
