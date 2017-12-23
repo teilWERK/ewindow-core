@@ -38,7 +38,7 @@ public:
 public:
     //friend class BaresipThread;
     BaresipVidisp();
-    ~BaresipVidisp();
+    virtual ~BaresipVidisp();
 
 signals:
 	//void presentFrame(const struct vidframe*);

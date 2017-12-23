@@ -30,8 +30,13 @@ BaresipVidisp::~BaresipVidisp()
 {
 	qInfo() << "\e[35mBaresipVidisp::~BaresipVidisp()\e[m";
 
-	delete m_geometry;
-	delete m_material;
+	// Ownership moved to QSGGeometryNode
+	//delete m_geometry;
+	//delete m_material;
+
+	m_material->setYTexture(0);
+	m_material->setUTexture(0);
+	m_material->setVTexture(0);
 
 	// TODO: check for possible race condition with ::display? 
 	m_context->makeCurrent(m_surface);
@@ -119,6 +124,8 @@ QSGNode* BaresipVidisp::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData*)
 		n = new QSGGeometryNode();
 		n->setMaterial(m_material);
 		n->setGeometry(m_geometry);
+		n->setFlag(QSGNode::OwnsGeometry);
+		n->setFlag(QSGNode::OwnsMaterial);
 		QSGGeometry::updateTexturedRectGeometry(m_geometry, boundingRect(), QRectF(0, 0, 1, 1));
 	}
 
