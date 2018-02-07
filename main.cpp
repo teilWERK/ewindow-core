@@ -14,6 +14,7 @@ extern "C" {
 #include "baresipvidisp.h"
 #include "contactlistmodel.h"
 #include "useragent.h"
+#include "volumemanager.h"
 
 #include <unistd.h>
 #include <libgen.h>
@@ -49,6 +50,7 @@ int main(int argc, char *argv[])
 
 	qmlRegisterInterface<BaresipCore>("BaresipCore");
 	qmlRegisterSingletonType<UserAgent>("org.ewindow.ua", 0, 1, "UserAgent", &UserAgent::newInstance);
+	qmlRegisterSingletonType<UserAgent>("org.ewindow", 0, 1, "VolumeManager", &VolumeManager::newInstance);
 	qmlRegisterUncreatableType<BaresipVidisp>("org.ewindow", 0, 1, "VideoDisplay", "VideoDisplay is created by the backend, use the onNewVideo callback");
 	qmlRegisterUncreatableType<ContactListModel>("org.ewindow", 0, 1, "ContactListModel", "ContactListModel is passed by the application through 'contactListModel'");
 

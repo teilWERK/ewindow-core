@@ -9,6 +9,7 @@ SOURCES += main.cpp \
     yuvtexturematerial.cpp \
     contactlistmodel.cpp \
     useragent.cpp \
+    volumemanager.cpp \
     baresipcore.cpp \
     baresipvidisp.h baresipvidisp.cpp
 
@@ -17,6 +18,7 @@ HEADERS += \
     yuvtexturematerial.h \
     contactlistmodel.h \
     useragent.h \
+    volumemanager.h \
     baresipcore.h
 
 
@@ -50,9 +52,9 @@ libbaresip.depends = re/libre.a rem/librem.a
 # Get the libraries, this should be replaced with something more robust
 git.target = re
 git.commands = \	
-	git clone https://github.com/creytiv/re && \
-	git clone https://github.com/creytiv/rem && \
-	git clone https://github.com/alfredh/baresip
+	git clone git://github.com/creytiv/re && \
+	git clone git://github.com/creytiv/rem && \
+	git clone git://github.com/alfredh/baresip
 
 
 PRE_TARGETDEPS += baresip/libbaresip.so

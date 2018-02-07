@@ -90,5 +90,42 @@ Window {
                 console.info("Window Keys.onPressed")
                 contactListDialog.show()
         }
+
+        MouseArea {
+            width: parent.width
+            height: parent.height
+
+            //var volume = 100;
+            property real volume: 100
+            property real step: 5
+            
+            onWheel: {
+                if (wheel.angleDelta.y > 0) {
+                    volume = Math.min(100, volume + step);
+                }
+                else if (wheel.angleDelta.y < 0) {
+                    volume = Math.max(0, volume - step);
+                }
+                
+                console.info("Wheel %f", wheel.angleDelta.y, volume);
+                VolumeManager.setVolume(volume)
+                fadeout.start()
+            }
+
+            Rectangle {
+                color: "blue"
+                height: parent.height / 10
+                width: parent.width * 0.8 * parent.volume / 100
+                anchors.centerIn: parent
+            }
+
+            NumberAnimation on opacity {
+                id: fadeout
+                from: 1.0
+                to: 0.0
+                easing.type: Easing.InExpo
+                duration: 2345
+            }
+        }
     }
 }
