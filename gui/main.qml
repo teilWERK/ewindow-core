@@ -34,7 +34,7 @@ Window {
         width: parent.width
         height: parent.height
         //opacity: 0
-        
+
         TimeoutDialog {
             id: contactListDialog
 
@@ -85,7 +85,12 @@ Window {
                 //ua.connect(uri)
             }
         }
-*/        
+*/
+        Keys.onEscapePressed: {
+            Qt.quit()
+        }
+        
+
         Keys.onPressed: {
                 console.info("Window Keys.onPressed")
                 contactListDialog.show()
