@@ -27,7 +27,8 @@ void BaresipCore::run()
     ret |= ua_init("baresip title", true, true, enable_tls, prefer_ipv6);
     if (ret) {
         puts("Error in ua_init(), exiting...");
-        exit(ret);
+        QCoreApplication::exit(ret);
+        return;
     }
 
     conf_modules();
