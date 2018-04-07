@@ -12,8 +12,8 @@
 #include <QOpenGLContext>
 #include <QOffscreenSurface>
 
-BaresipVidisp::BaresipVidisp()
-{
+BaresipVidisp::BaresipVidisp(webrtc::VideoTrackInterface* track_to_render)
+{	
 	qInfo("BaresipVidisp constructor");
 	setFlag(ItemHasContents);
 	m_context = 0;
@@ -24,6 +24,8 @@ BaresipVidisp::BaresipVidisp()
 
 	m_geometry = new QSGGeometry(QSGGeometry::defaultAttributes_TexturedPoint2D(), 4);
 	m_material = new YUVTextureMaterial;
+
+	track_to_render->AddOrUpdateSink(this, rtc::VideoSinkWants());
 }
 
 BaresipVidisp::~BaresipVidisp()
@@ -38,8 +40,10 @@ BaresipVidisp::~BaresipVidisp()
 	m_material->setUTexture(0);
 	m_material->setVTexture(0);
 
-	// TODO: check for possible race condition with ::display? 
-	m_context->makeCurrent(m_surface);
+	// TODO: check for possible race condition with ::display?
+	if (m_context) {
+		m_context->makeCurrent(m_surface);
+	}
 
 	delete m_ytex;
 	delete m_utex;
@@ -136,7 +140,8 @@ QSGNode* BaresipVidisp::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData*)
 	return n;
 }
 
-void BaresipVidisp::uploadTexture(const vidframe* vf) {
+//void BaresipVidisp::uploadTexture(const vidframe* vf) {
+void BaresipVidisp::OnFrame(const webrtc::VideoFrame& frame) {
 	if (!m_context || !m_surface) {
 		qInfo() << this << "no context yet, returning...";
 		return;
@@ -144,20 +149,23 @@ void BaresipVidisp::uploadTexture(const vidframe* vf) {
 
 	m_context->makeCurrent(m_surface);
 
-	if (!m_ytex) createTextures(vf->linesize[0], vf->size.h);
+
+	rtc::scoped_refptr<webrtc::I420BufferInterface> buffer(
+		frame.video_frame_buffer()->ToI420());
+	if (!m_ytex) createTextures(buffer->StrideY(), buffer->height());
 
 	//qInfo() << "uploading texture";
-	m_ytex->setData(QOpenGLTexture::Luminance, QOpenGLTexture::UInt8, (const void*)vf->data[0]);
-	m_utex->setData(QOpenGLTexture::Luminance, QOpenGLTexture::UInt8, (const void*)vf->data[1]);
-	m_vtex->setData(QOpenGLTexture::Luminance, QOpenGLTexture::UInt8, (const void*)vf->data[2]);
+	m_ytex->setData(QOpenGLTexture::Luminance, QOpenGLTexture::UInt8, buffer->DataY());
+	m_utex->setData(QOpenGLTexture::Luminance, QOpenGLTexture::UInt8, buffer->DataU());
+	m_vtex->setData(QOpenGLTexture::Luminance, QOpenGLTexture::UInt8, buffer->DataV());
 
-	float x_scale = float(vf->size.w) / float(vf->linesize[0]);
+	float x_scale = float(buffer->width()) / float(buffer->StrideY());
 	QSGGeometry::updateTexturedRectGeometry(m_geometry, boundingRect(), QRectF(0, 0, x_scale, 1));
 
 	m_context->doneCurrent();
 }
 
-
+/*
 void BaresipVidisp::register_vidisp() {
 	struct vidisp* st;
 	int ret = vidisp_register(&st, baresip_vidispl(), "qtupload",
@@ -205,3 +213,4 @@ void BaresipVidisp::destroy(void* arg) {
 	//st->vidisp->deleteLater();
 	QMetaObject::invokeMethod(st->vidisp, "deleteLater", Qt::QueuedConnection);
 }
+*/

@@ -1,23 +1,22 @@
+#include <rtc_base/thread.h>
+
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
 #include <QOpenGLContext>
 #include <QLibraryInfo>
 
-extern "C" {
-#include <re.h>
-#include <baresip.h>
-}
+#include <QDebug>
+
+#include <unistd.h>
+#include <libgen.h>
+
+#include <cassert>
 
 
 #include "baresipcore.h"
 #include "baresipvidisp.h"
-#include "contactlistmodel.h"
-#include "useragent.h"
-#include "volumemanager.h"
 
-#include <unistd.h>
-#include <libgen.h>
 
 int main(int argc, char *argv[])
 {
@@ -26,35 +25,32 @@ int main(int argc, char *argv[])
 		setenv("QT_QPA_PLATFORM", "eglfs", 0);
 	}
 
-	// Enable pulseaudio's echo-cancellation
-	setenv("PULSE_PROP", "filter.want=echo-cancel", 0);
-
 	QGuiApplication::setAttribute(Qt::AA_UseOpenGLES);
 	QGuiApplication app(argc, argv);
 
-	if (!QOpenGLContext::supportsThreadedOpenGL()) {
-		qWarning("Platform has no GL threading support!!!");
-		//exit(1);
-	}
-
-	BaresipCore::instance().start();
-	ContactListModel clModel;
-	
 	QQmlApplicationEngine engine;
 
-	qRegisterMetaType<Call>();
+	//	qRegisterMetaType<Call>();
 
 	// two mean hacks to get data inside QML
-	engine.rootContext()->setContextProperty("contactListModel", &clModel);
+	//engine.rootContext()->setContextProperty("contactListModel", &clModel);
 	engine.rootContext()->setContextProperty("baresipCore", &BaresipCore::instance());
 
 	qmlRegisterInterface<BaresipCore>("BaresipCore");
-	qmlRegisterSingletonType<UserAgent>("org.ewindow.ua", 0, 1, "UserAgent", &UserAgent::newInstance);
-	qmlRegisterSingletonType<UserAgent>("org.ewindow", 0, 1, "VolumeManager", &VolumeManager::newInstance);
+	//qmlRegisterSingletonType<UserAgent>("org.ewindow.ua", 0, 1, "UserAgent", &UserAgent::newInstance);
+	//qmlRegisterSingletonType<UserAgent>("org.ewindow", 0, 1, "VolumeManager", &VolumeManager::newInstance);
 	qmlRegisterUncreatableType<BaresipVidisp>("org.ewindow", 0, 1, "VideoDisplay", "VideoDisplay is created by the backend, use the onNewVideo callback");
-	qmlRegisterUncreatableType<ContactListModel>("org.ewindow", 0, 1, "ContactListModel", "ContactListModel is passed by the application through 'contactListModel'");
+	//qmlRegisterUncreatableType<ContactListModel>("org.ewindow", 0, 1, "ContactListModel", "ContactListModel is passed by the application through 'contactListModel'");
 
+
+	//rtc::AutoSocketServerThread thread(0);
+
+	// This needs to be instantianted before, for WebRTC's internal threading to work
+	rtc::AutoThread thread;
+	//thread.Run();
+	
 	// Change working dir to exe's dir, so it will find the .qml's
+	
 	chdir(dirname(argv[0]));
 	engine.load(QUrl(QStringLiteral("gui/main.qml")));
 	if (engine.rootObjects().isEmpty())

@@ -15,6 +15,9 @@ public:
     static BaresipCore& instance() { static BaresipCore instance; return instance; }
     void run();
 
+public slots:
+    void initWebRTC();
+
 private:
     BaresipCore() = default;
 };

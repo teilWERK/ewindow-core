@@ -2,7 +2,7 @@ import QtQuick 2.7
 import QtQuick.Window 2.2
 
 import org.ewindow 0.1
-import org.ewindow.ua 0.1
+//import org.ewindow.ua 0.1
 
 import "logic.js" as Logic
 
@@ -47,6 +47,7 @@ Window {
             }
 
             onAction: {
+                baresipCore.initWebRTC();
                 var uri = contactList.getCurrentURI()
                 if (!uri) {
                     console.error("Fix the contactlist select bug")
@@ -59,11 +60,12 @@ Window {
                 opacity = 0
             }
 
-            ContactList {
+/*            ContactList {
                 id: contactList
                 model: contactListModel
                 visible: true
             }
+*/
         }
 /*
         TimeoutDialog {
@@ -115,6 +117,10 @@ Window {
                 console.info("Wheel %f", wheel.angleDelta.y, volume);
                 VolumeManager.setVolume(volume)
                 fadeout.start()
+            }
+
+            onClicked: {
+                contactListDialog.show()
             }
 
             Rectangle {
