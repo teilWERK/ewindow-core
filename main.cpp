@@ -26,7 +26,7 @@
 #include "baresipvidisp.h"
 */
 
-#include "peerdiscoverer.h"
+#include "peerfinder.h"
 
 void registerTypes() {
 	/*
@@ -56,7 +56,7 @@ void registerTypes() {
 	*/
 
 	//qmlRegisterType<QZeroConf>("org.ewindow", 0, 1, "QZeroConf");
-	qmlRegisterType<PeerDiscoverer>("org.ewindow", 0, 1, "PeerDiscoverer");
+	qmlRegisterType<PeerFinder>("org.ewindow", 0, 1, "PeerFinder");
 }
 
 

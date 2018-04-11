@@ -20,16 +20,16 @@ Window {
     }
     * */
 
-    PeerDiscoverer {
+    PeerFinder {
         id: zc
     }
 
     Component.onCompleted: {
-        zc.publish()
+        zc.publish("myfancyhostname")
     }
 
     Timer {
-        interval: 1000
+        interval: 800
         running: true
         repeat: true
 
@@ -37,37 +37,21 @@ Window {
 
 
         onTriggered: {
-            console.log("foo", counter)
-            switch (counter++) {
-                case 0:
-                    zc.stopPublish()
-                    break;
-                case 1:
-                    zc.publish()
-                    break;
-                case 2:
-                    zc.stopPublish()
-                    break;
-                case 3:
-                    zc.publish();
-                    break;
-                case 3:
-                    zc.setStatus(3);
-                    break;
-            }
+            zc.setStatus(counter++);
         }
     }
 
-/*
-    QWebRTCPeerConnectionFactory {
-        id: pcf
+    ContactList {
+        model: zc.peers
+        visible: true
+        opacity: 0.5
     }
-    */
-/*
-    QWebRTCConfiguration {
-        id: foo
+
+    Rectangle {
+        color: 'red'
+        width: 100
+        height: 100
     }
-*/    
 
     FocusScope {
         focus: true

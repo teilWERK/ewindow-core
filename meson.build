@@ -19,14 +19,14 @@ webrtc_dep = declare_dependency(
 )
 
 moc_headers = files(
-    'peerdiscoverer.h',
+    'peerfinder.h',
     #'baresipcore.h',
     #'baresipvidisp.h',
 )
 
 sources = files(
     'main.cpp',
-    'peerdiscoverer.cpp',
+    'peerfinder.cpp',
     #'baresipcore.cpp',
     #'baresipvidisp.cpp',
     #'yuvtexturematerial.cpp',
