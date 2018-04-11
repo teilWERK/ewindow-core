@@ -38,7 +38,7 @@ public:
     BaresipVidisp(webrtc::VideoTrackInterface* track_to_render);
     virtual ~BaresipVidisp();
 
-signals:
+Q_SIGNALS:
 	//void presentFrame(const struct vidframe*);
 
 protected:

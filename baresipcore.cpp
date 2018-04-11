@@ -18,6 +18,25 @@
 
 using namespace webrtc;
 
+
+class DummySetSessionDescriptionObserver
+    : public webrtc::SetSessionDescriptionObserver {
+ public:
+  static DummySetSessionDescriptionObserver* Create() {
+    return
+        new rtc::RefCountedObject<DummySetSessionDescriptionObserver>();
+  }
+  virtual void OnSuccess() { RTC_LOG(INFO) << __FUNCTION__; }
+  virtual void OnFailure(const std::string& error) {
+    RTC_LOG(INFO) << __FUNCTION__ << " " << error;
+  }
+
+ protected:
+  DummySetSessionDescriptionObserver() {}
+  ~DummySetSessionDescriptionObserver() {}
+};
+
+
 class MyPeerConnectionObserver
   : public webrtc::PeerConnectionObserver
 {
@@ -126,22 +145,22 @@ class MyPeerConnectionObserver
 
 class SDPObserver : public webrtc::CreateSessionDescriptionObserver
 {
-	void OnSuccess(webrtc::SessionDescriptionInterface* desc) override {
-		std::string sdp;
-		desc->ToString(&sdp);
-		qInfo() << "SDP success" << sdp.c_str();
-		//assert(0);
-	}
-
-	void OnFailure(const std::string& error) override {
-		qInfo() << "SDP Error: " << error.c_str();
-		assert(0);
+  void OnSuccess(webrtc::SessionDescriptionInterface* desc) override {
+    std::string sdp;
+    desc->ToString(&sdp);
+    qInfo() << "SDP success" << sdp.c_str();
+    
+    pci->SetRemoteDescription(DummySetSessionDescriptionObserver::Create(), desc);
   }
-};
 
-static void sighandler(int signal) {
-	exit(signal);
-}
+  void OnFailure(const std::string& error) override {
+    qInfo() << "SDP Error: " << error.c_str();
+    assert(0);
+  }
+
+  public:
+    rtc::scoped_refptr<webrtc::PeerConnectionInterface> pci;
+};
 
 
 std::unique_ptr<cricket::VideoCapturer> OpenVideoCaptureDevice() {
@@ -175,55 +194,14 @@ std::unique_ptr<cricket::VideoCapturer> OpenVideoCaptureDevice() {
   return capturer;
 }
 
-
-
-
-void BaresipCore::run()
-{
-    /*
-    //BaresipVidisp::m_vidisp->moveToThread(this);
-    int ret;
-    const char* conf_path = "/etc/ewindow";
-    libre_init();
-    conf_path_set(conf_path);
-    conf_configure();
-
-    //log_enable_debug(true);
-    log_enable_info(true);
-
-    bool enable_tls = false;
-    bool prefer_ipv6 = true;
-
-    ret = baresip_init(conf_config(), prefer_ipv6);
-    ret |= ua_init("baresip title", true, true, enable_tls, prefer_ipv6);
-    if (ret) {
-        puts("Error in ua_init(), exiting...");
-        QCoreApplication::exit(ret);
-        return;
-    }
-
-    conf_modules();
-
-    // TODO: overwrite some basic conf/settings, like video_display?
-
-	BaresipVidisp::register_vidisp();
-
-//        tmr_init(&m_timer);
-//        tmr_start(&m_timer, 100, re_callback, this);
-
-    re_main(sighandler);
-    * */
-}
-
-
 void BaresipCore::initWebRTC() {
-	// Create PC Factory. Stuff like Video codecs plugs here
-	static rtc::scoped_refptr<webrtc::PeerConnectionFactoryInterface> pcfi =
-		webrtc::CreatePeerConnectionFactory(
-			webrtc::CreateBuiltinAudioEncoderFactory(),
-			webrtc::CreateBuiltinAudioDecoderFactory()
-		);
-
+  // Create PC Factory. Stuff like Video codecs plugs here
+  static rtc::scoped_refptr<webrtc::PeerConnectionFactoryInterface> pcfi =
+  webrtc::CreatePeerConnectionFactory(
+    webrtc::CreateBuiltinAudioEncoderFactory(),
+    webrtc::CreateBuiltinAudioDecoderFactory()
+  );
+  
 	// Prepare the media stream, our "payload" (audio and video)
 	static rtc::scoped_refptr<webrtc::MediaStreamInterface> stream =
       pcfi->CreateLocalMediaStream("my_fancy_stream");
@@ -248,8 +226,8 @@ void BaresipCore::initWebRTC() {
 	stream->AddTrack(audio_track);
 	stream->AddTrack(video_track);
 
-	static BaresipVidisp vidisp(video_track);
-	emit BaresipCore::instance().newVideo(&vidisp);
+	//static BaresipVidisp vidisp(video_track);
+	//Q_EMIT BaresipCore::instance().newVideo(&vidisp);
 
 	webrtc::PeerConnectionInterface::RTCConfiguration rtcconf;
 
@@ -257,14 +235,16 @@ void BaresipCore::initWebRTC() {
 	constraints.AddOptional(webrtc::MediaConstraintsInterface::kEnableDtlsSrtp,
 							"false");
 
-	MyPeerConnectionObserver observer;
-	auto pci = pcfi->CreatePeerConnection(rtcconf, &constraints, 0 /*port allocator*/, 0/*cert generator*/, &observer);
+	static MyPeerConnectionObserver observer;
+	static auto pci = pcfi->CreatePeerConnection(rtcconf, &constraints, 0 /*port allocator*/, 0/*cert generator*/, &observer);
 
 
 	pci->AddStream(stream);
 
-	auto sdpo = new rtc::RefCountedObject<SDPObserver>();
+	static auto sdpo = new rtc::RefCountedObject<SDPObserver>();
+	sdpo->pci = pci;
 	pci->CreateOffer(sdpo, 0);
+
 
 	assert(pci);
 

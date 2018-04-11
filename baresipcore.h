@@ -8,14 +8,14 @@ class BaresipVidisp;
 class BaresipCore : public QThread {
     Q_OBJECT
 
-signals:
+Q_SIGNALS:
     void newVideo(BaresipVidisp* video);
 
 public:
     static BaresipCore& instance() { static BaresipCore instance; return instance; }
-    void run();
+    void run() {}
 
-public slots:
+public Q_SLOTS:
     void initWebRTC();
 
 private:

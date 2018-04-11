@@ -103,7 +103,7 @@ QSGNode* BaresipVidisp::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData*)
 	}
 
 	if (!m_context) {
-		QCoreApplication::setAttribute(Qt::AA_DontCheckOpenGLContextThreadAffinity);
+//		QCoreApplication::setAttribute(Qt::AA_DontCheckOpenGLContextThreadAffinity);
 		qInfo() << "creating new context";
 		QOpenGLContext* current = window()->openglContext();
 		qInfo() << current->isValid();

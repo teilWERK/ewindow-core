@@ -2,9 +2,10 @@ import QtQuick 2.7
 import QtQuick.Window 2.2
 
 import org.ewindow 0.1
+//import org.ewindow.webrtc 0.1
 //import org.ewindow.ua 0.1
 
-import "logic.js" as Logic
+//import "logic.js" as Logic
 
 Window {
     id: mainWindow
@@ -12,131 +13,92 @@ Window {
     width: 640
     height: 480
 
-	// A QML Object to attach new video renderers to
-	// TODO: Make a renderer class that is filled by baresip_vidisp
-    Rectangle {
-        id: videoContainer
-        anchors.fill: parent
-    }    
+/*
+    QWebRTCQuickVideoItem {
+        id: videoItem
+        anchors.fill: parent   
+    }
+    * */
 
-	// Hook up newVideo events to the video container
-    Connections {
-        target: baresipCore
-        onNewVideo: {
-			console.info("Attaching new video device")
-            video.parent = videoContainer
-            video.anchors.fill = videoContainer
+    PeerDiscoverer {
+        id: zc
+    }
+
+    Component.onCompleted: {
+        zc.publish()
+    }
+
+    Timer {
+        interval: 1000
+        running: true
+        repeat: true
+
+        property var counter: 0
+
+
+        onTriggered: {
+            console.log("foo", counter)
+            switch (counter++) {
+                case 0:
+                    zc.stopPublish()
+                    break;
+                case 1:
+                    zc.publish()
+                    break;
+                case 2:
+                    zc.stopPublish()
+                    break;
+                case 3:
+                    zc.publish();
+                    break;
+                case 3:
+                    zc.setStatus(3);
+                    break;
+            }
         }
     }
+
+/*
+    QWebRTCPeerConnectionFactory {
+        id: pcf
+    }
+    */
+/*
+    QWebRTCConfiguration {
+        id: foo
+    }
+*/    
 
     FocusScope {
         focus: true
         width: parent.width
         height: parent.height
         //opacity: 0
-
-        TimeoutDialog {
-            id: contactListDialog
-
-            focus: true
-            onNext: contactList.selectNext()
-
-            onTimeout: {
-                //keyFocusItem.focus = true
-                // hide()
-            }
-
-            onAction: {
-                baresipCore.initWebRTC();
-                var uri = contactList.getCurrentURI()
-                if (!uri) {
-                    console.error("Fix the contactlist select bug")
-                    return
-                }
-
-                console.info("selection complete, connecting to ", uri)
-                Logic.make_connection(uri)
-                hide()
-                opacity = 0
-            }
-
-/*            ContactList {
-                id: contactList
-                model: contactListModel
-                visible: true
-            }
-*/
-        }
-/*
-        TimeoutDialog {
-            id: callConfirmation
-
-            property string dname: "null"
-            property string uri
-
-            Text {
-                font.pointSize: 36
-                text: " Do you really want to call %s ?\n Press Button to confirm".arg(
-                          "foo")
-                //parent.dname)
-            }
-
-            onAction: {
-                // hide() // Which Function is this? doesn't even exist
-                console.warn("Not connecting to", uri)
-                //ua.connect(uri)
-            }
-        }
-*/
+        
         Keys.onEscapePressed: {
             Qt.quit()
-        }
-        
+        }    
 
         Keys.onPressed: {
-                console.info("Window Keys.onPressed")
-                contactListDialog.show()
-        }
+            return;
+            console.info("Window Keys.onPressed")
 
-        MouseArea {
-            width: parent.width
-            height: parent.height
+            var ms = pcf.createMediaStream("my_media_stream")
+            var vt = pcf.createVideoTrack({})
 
-            //var volume = 100;
-            property real volume: 100
-            property real step: 5
+            ms.addTrack = vt
+            console.log(ms)
+            //videoItem.videoTrack = vt
+            var pc = pcf.createPeerConnection(foo)
+            pc.addStream(ms)
+
+            var sdp = pc.createOffer()
+
+            console.info(sdp)
             
-            onWheel: {
-                if (wheel.angleDelta.y > 0) {
-                    volume = Math.min(100, volume + step);
-                }
-                else if (wheel.angleDelta.y < 0) {
-                    volume = Math.max(0, volume - step);
-                }
-                
-                console.info("Wheel %f", wheel.angleDelta.y, volume);
-                VolumeManager.setVolume(volume)
-                fadeout.start()
-            }
-
-            onClicked: {
-                contactListDialog.show()
-            }
-
-            Rectangle {
-                color: "blue"
-                height: parent.height / 10
-                width: parent.width * 0.8 * parent.volume / 100
-                anchors.centerIn: parent
-            }
-
-            NumberAnimation on opacity {
-                id: fadeout
-                from: 1.0
-                to: 0.0
-                easing.type: Easing.InExpo
-                duration: 2345
-            }
+            //var ms = pcf.createMediaStream("my_fancy_mediastream")
+            //console.info(ms)
+                //pc = pcf.createPeerConnection()
         }
     }
 }

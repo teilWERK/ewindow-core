@@ -1,0 +1,41 @@
+project('ewindow', 'cpp')
+
+qt5 = import('qt5')
+qt5_dep = dependency('qt5', modules: ['Core', 'Quick'])
+
+qwebrtc = subproject('qwebrtc')
+qwebrtc_dep = qwebrtc.get_variable('qwebrtc_dep')
+
+qtzeroconf = subproject('QtZeroConf')
+qtzeroconf_dep = qtzeroconf.get_variable('qtzeroconf_dep')
+
+compiler = meson.get_compiler('cpp')
+libgl = compiler.find_library('GL')
+
+webrtc_dep = declare_dependency(
+    include_directories: include_directories('../webrtc-meson'),
+    compile_args: ['-DWEBRTC_POSIX'],
+    link_args: ['-L../../webrtc-meson/build', '-lwebrtc_full']
+)
+
+moc_headers = files(
+    'peerdiscoverer.h',
+    #'baresipcore.h',
+    #'baresipvidisp.h',
+)
+
+sources = files(
+    'main.cpp',
+    'peerdiscoverer.cpp',
+    #'baresipcore.cpp',
+    #'baresipvidisp.cpp',
+    #'yuvtexturematerial.cpp',
+)
+
+moc_files = qt5.preprocess(moc_headers: moc_headers)
+
+executable('ewindow', sources, moc_files,
+    #dependencies: [qwebrtc_dep, webrtc_dep, libgl, qtzeroconf_dep],
+    dependencies: [qtzeroconf_dep, qt5_dep],
+    cpp_args: '-DQT_NO_KEYWORDS'
+)
