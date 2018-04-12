@@ -3,11 +3,9 @@ import QtQuick 2.7
 import org.ewindow 0.1
 
 ListView {
-    model: parent.model
-    anchors.fill: parent
-
     id: listView
 
+    anchors.fill: parent
     clip: true
 
     delegate: contactDelegate
@@ -17,6 +15,9 @@ ListView {
         radius: 5
     }
 
+
+    // Helper function for the old one-button-interface
+    /*
     function selectNext() {
         var view = listView
         console.info(view.currentIndex, view.count)
@@ -26,44 +27,7 @@ ListView {
             view.currentIndex++
         }
     }
-
-    function getCurrentURI() {
-        var row = listView.currentIndex
-        if (row == -1)
-            return null
-
-        console.log("getCurrentURI")
-        var idx = model.index(row, 0)
-        var dat = model.data(idx, ContactListModel.URIRole)
-        return dat
-    }
-
-    anchors.centerIn: parent
-
-    OpacityAnimator on opacity {
-        id: fadeIn
-        from: 0
-        to: .55
-        duration: 333
-        running: true
-    }
-
-    OpacityAnimator on opacity {
-        id: fadeOut
-        from: opacity
-        to: 0
-        duration: 333
-        running: false
-    }
-
-    onVisibleChanged: {
-        console.info("changed visible ->", visible)
-        if (visible) {
-            fadeIn.start()
-        } else {
-            fadeOut.start()
-        }
-    }
+    */
 
     Component {
         id: contactDelegate
@@ -77,7 +41,7 @@ ListView {
                anchors.fill: parent
                onClicked: {
                    if (index == listView.currentIndex) {
-                       contactSelected(uri)
+                       contactSelected(ip)
                    }
 
                    listView.currentIndex = index
@@ -99,18 +63,17 @@ ListView {
             }
 
             Rectangle {
-				anchors.verticalCenter: parent.verticalCenter
-				x: y
-				width: parent.height / 4
-				height: width
-				radius: width
+            anchors.verticalCenter: parent.verticalCenter
+            x: y
+            width: parent.height / 4
+            height: width
+            radius: width
 
-				color: presence === ContactListModel.PRESENCE_OPEN ? "green" : "red"
-				//color: presence === 1 ? "green" : "red"
+            color: status != 0 ? "green" : "red"
             }
 
             Text {
-                text: dname
+                text: name
 
                 anchors { left: idLogo.right;
                     right: parent.right

@@ -29,12 +29,11 @@ Window {
     }
 
     Timer {
-        interval: 800
+        interval: 30000
         running: true
         repeat: true
 
         property var counter: 0
-
 
         onTriggered: {
             zc.setStatus(counter++);
@@ -42,22 +41,12 @@ Window {
     }
 
     ContactList {
-        model: zc.peers
-        visible: true
-        opacity: 0.5
-    }
-
-    Rectangle {
-        color: 'red'
-        width: 100
-        height: 100
+        id: cl
+        model: zc.model
     }
 
     FocusScope {
         focus: true
-        width: parent.width
-        height: parent.height
-        //opacity: 0
         
         Keys.onEscapePressed: {
             Qt.quit()
@@ -67,22 +56,10 @@ Window {
             return;
             console.info("Window Keys.onPressed")
 
-            var ms = pcf.createMediaStream("my_media_stream")
-            var vt = pcf.createVideoTrack({})
+            var pc = rtc.preparePeerConnection()
+            var sdp = rtc.offerSDP()
 
-            ms.addTrack = vt
-            console.log(ms)
-            //videoItem.videoTrack = vt
-            var pc = pcf.createPeerConnection(foo)
-            pc.addStream(ms)
-
-            var sdp = pc.createOffer()
-
-            console.info(sdp)
-            
-            //var ms = pcf.createMediaStream("my_fancy_mediastream")
-            //console.info(ms)
-                //pc = pcf.createPeerConnection()
+            rtc.sendSDP(url); //???
         }
     }
 }

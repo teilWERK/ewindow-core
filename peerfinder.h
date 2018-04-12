@@ -2,49 +2,64 @@
 
 #include "qzeroconf.h"
 
-/** Think of useful presence status, besides Available and Busy/InConnection
-enum class PresenceStatus {
-	
-};
-* */
+#include <QQmlListProperty>
 
 class Peer : public QObject {
-	Q_GADGET
+	Q_OBJECT
+	/** Think of useful presence status, besides Available and Busy/InConnection
+	enum class PresenceStatus {
+		AVAILABLE = 0,
+		BUSY,
+		INCLOSEDCONNECTION,
+	};
+	*/
 
-	friend class PeerFinder;
+	Q_PROPERTY(QString name MEMBER m_name NOTIFY nameChanged);
+	Q_PROPERTY(int status MEMBER m_status NOTIFY statusChanged);
+	Q_PROPERTY(QHostAddress ip MEMBER m_ip NOTIFY ipChanged);
+	Q_PROPERTY(uint32_t interfaceIndex MEMBER m_interfaceIndex);
 
-public:
-    Q_PROPERTY(QString name MEMBER name);
-    Q_PROPERTY(int status MEMBER status);
+Q_SIGNALS:
+	void nameChanged();
+	void statusChanged();
+	void ipChanged();
 
 private:
-	QString name;
-	QHostAddress ip;
-	uint32_t interfaceIndex;
-	int status;
+	QString m_name;
+	int m_status;
+	QHostAddress m_ip;
+	quint32 m_interfaceIndex;
+
+	friend class PeerFinder;
 };
 
 class PeerFinder : public QObject {
 	Q_OBJECT
+
+	Q_PROPERTY(QQmlListProperty<Peer> model READ model NOTIFY peersChanged);
+
 public:
 	PeerFinder();
 	~PeerFinder();
 
-	QList<Peer*> peers();
-
 public Q_SLOTS:
+	// Set the current presence status. TODO: Make a proper enum with states
 	void setStatus(int i);
 
-	void publish(QString hostname, QString service = "_qtzeroconf_test._tcp", uint16_t port=11437);
+	void publish(QString hostname, QString service = "_ewindow._tcp", uint16_t port=11437);
 	void unpublish();
 
+	QQmlListProperty<Peer> model();
+
+Q_SIGNALS:
+	void peersChanged();
 
 private:
 	QZeroConf *m_zeroconf;
-	QList<Peer*> m_peers;
+	QList<Peer*> m_peerlist;
 
-	static QString make_key(QZeroConfService& service);
-	static QString make_key(Peer* service);
+	static QString make_key(const QZeroConfService& service);
+	static QString make_key(const Peer* service);
 
 private Q_SLOTS:
 	void printError(QZeroConf::error_t);

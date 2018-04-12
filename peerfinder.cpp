@@ -4,17 +4,26 @@
 #include <QDataStream>
 #include <QDebug>
 
-#include <stdint.h>
-
 PeerFinder::PeerFinder()
 {
 	m_zeroconf = new QZeroConf;
 
 	connect(m_zeroconf, &QZeroConf::error, this, &PeerFinder::printError);
-	
 	connect(m_zeroconf, &QZeroConf::serviceAdded, this, &PeerFinder::peerAdded);
 	connect(m_zeroconf, &QZeroConf::serviceUpdated, this, &PeerFinder::peerUpdated);
 	connect(m_zeroconf, &QZeroConf::serviceRemoved, this, &PeerFinder::peerRemoved);
+
+	/* Fake entries for testing property list binding...
+	Peer* fakepeer = new Peer;
+	fakepeer->m_name = "foo";
+	fakepeer->m_status = 1;
+	m_peerlist.append(fakepeer);
+
+	fakepeer = new Peer;
+	fakepeer->m_name = "bar";
+	fakepeer->m_status = 0;
+	m_peerlist.append(fakepeer);
+	* */
 }
 
 PeerFinder::~PeerFinder()
@@ -27,7 +36,7 @@ void PeerFinder::publish(QString hostname, QString service, uint16_t port)
 	m_zeroconf->startServicePublish(hostname.toUtf8(), service.toUtf8(), "local", port);
 
 	// Start and stop the browser with publish, because constructor is too early to not crash...
-	m_zeroconf->startBrowser("_qtzeroconf_test._tcp", QAbstractSocket::IPv6Protocol);
+	m_zeroconf->startBrowser(service, QAbstractSocket::IPv6Protocol);
 }
 
 void PeerFinder::unpublish() {
@@ -41,50 +50,61 @@ void PeerFinder::setStatus(int presence) {
 	m_zeroconf->updateServiceTxtRecords();
 }
 
+QQmlListProperty<Peer> PeerFinder::model()
+{
+	// TODO: Qt Doc says this constructor should not be used in production code
+	return QQmlListProperty<Peer>(this, m_peerlist);
+}
+
 void PeerFinder::printError(QZeroConf::error_t error) {
 	qWarning() << "PeerFinder: Internal QZeroConf Error: " << error;
 }
 
-QString PeerFinder::make_key(QZeroConfService& service)
+QString PeerFinder::make_key(const QZeroConfService& service)
 {
 	// Do it like the QZeroConf resolveCallback...
 	return service.name() + QString::number(service.interfaceIndex());
 }
 
-QString PeerFinder::make_key(Peer* peer)
+QString PeerFinder::make_key(const Peer* peer)
 {
 	// Do it like the QZeroConf resolveCallback...
-	return peer->name + QString::number(peer->interfaceIndex);
+	return peer->m_name + QString::number(peer->m_interfaceIndex);
 }
 
 void PeerFinder::peerAdded(QZeroConfService service)
 {
-	qInfo() << "PeerFinder::peerAdded" << service;
-	for (auto i : m_peers) {
-		if (make_key(i) == make_key(service)) {
+	qDebug() << "PeerFinder::peerAdded" << service;
+	//for (auto i : m_peerlist) {
+	for (QList<Peer*>::const_iterator i = m_peerlist.begin(); i != m_peerlist.end(); i++) {
+		const Peer* p = static_cast<Peer*>(*i);
+		if (make_key(p) == make_key(service)) {
 			qWarning() << "PeerFinder::peerAdded: Ignoring double add of " << service;
 			return;
 		}
 	}
 	
 	Peer* peer = new Peer;
-	peer->name = service.name();
-	peer->ip = service.ipv6();
-	peer->interfaceIndex = service.interfaceIndex();
+	peer->m_name = service.name();
+	peer->m_ip = service.ipv6();
+	peer->m_interfaceIndex = service.interfaceIndex();
 	
 	QDataStream ds(service.txt()["status"]);
-	ds >> peer->status;
+	ds >> peer->m_status;
 
-	m_peers.append(peer);
+	m_peerlist.append(peer);
+	Q_EMIT peersChanged();
 }
 
 void PeerFinder::peerUpdated(QZeroConfService service)
 {
-	qInfo() << "PeerFinder::peerUpdated" << service;
-	for (auto i : m_peers) {
-		if (make_key(i) == make_key(service)) {
+	qDebug() << "PeerFinder::peerUpdated" << service;
+	for (auto i: m_peerlist) {
+		Peer* p = static_cast<Peer*>(i);
+		if (make_key(p) == make_key(service)) {
 			QDataStream ds(service.txt()["status"]);
-			ds >> i->status;
+			ds >> p->m_status;
+			Q_EMIT peersChanged();
 			return;
 		}
 	}
@@ -95,11 +115,12 @@ void PeerFinder::peerUpdated(QZeroConfService service)
 void PeerFinder::peerRemoved(QZeroConfService service)
 {
 	qInfo() << "PeerFinder::peerRemoved" << service;
-	for (auto i : m_peers) {
-		if (make_key(i) == make_key(service)) {
-			qWarning() << "PeerFinder::peerRemove not implemented";
-			//m_peers.remove(i);
-			//delete i;
+	QMutableListIterator<Peer*> i(m_peerlist);
+	while (i.hasNext()) {
+		Peer* p = i.next();
+		if (make_key(p) == make_key(service)) {
+			i.remove();
+			Q_EMIT peersChanged();
 			return;
 		}
 	}
