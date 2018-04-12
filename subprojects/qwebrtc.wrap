@@ -1,0 +1,4 @@
+[wrap-git]
+directory = qwebrtc
+url = https://github.com/strfry/qwebrtc
+revision = head
