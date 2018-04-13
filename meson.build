@@ -12,11 +12,7 @@ qtzeroconf_dep = qtzeroconf.get_variable('qtzeroconf_dep')
 compiler = meson.get_compiler('cpp')
 libgl = compiler.find_library('GL')
 
-webrtc_dep = declare_dependency(
-    include_directories: include_directories('../webrtc-meson'),
-    compile_args: ['-DWEBRTC_POSIX'],
-    link_args: ['-L../../webrtc-meson/build', '-lwebrtc_full']
-)
+webrtc_dep = dependency('webrtc', fallback: ['webrtc', 'webrtc_dep'])
 
 moc_headers = files(
     'peerfinder.h',
@@ -36,6 +32,6 @@ moc_files = qt5.preprocess(moc_headers: moc_headers)
 
 executable('ewindow', sources, moc_files,
     #dependencies: [qwebrtc_dep, webrtc_dep, libgl, qtzeroconf_dep],
-    dependencies: [qtzeroconf_dep, qt5_dep],
+    dependencies: [qtzeroconf_dep, qt5_dep, webrtc_dep],
     cpp_args: '-DQT_NO_KEYWORDS'
 )
