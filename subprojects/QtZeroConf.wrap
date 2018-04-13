@@ -1,0 +1,4 @@
+[wrap-git]
+directory = QtZeroConf
+url = https://github.com/strfry/QtZeroConf
+revision = head

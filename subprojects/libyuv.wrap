@@ -1,0 +1,4 @@
+[wrap-git]
+directory = libyuv
+url = https://github.com/strfry/libyuv-meson
+revision = head

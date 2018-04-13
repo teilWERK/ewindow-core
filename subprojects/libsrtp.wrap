@@ -1,0 +1,4 @@
+[wrap-git]
+directory = libsrtp
+url = https://github.com/strfry/libsrtp
+revision = meson
