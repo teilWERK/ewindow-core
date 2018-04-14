@@ -3,6 +3,7 @@
 
 #include <QDataStream>
 #include <QDebug>
+#include <QNetworkInterface>
 
 PeerFinder::PeerFinder()
 {
@@ -31,7 +32,8 @@ PeerFinder::~PeerFinder()
 	delete m_zeroconf;
 }
 
-void PeerFinder::publish(QString hostname, QString service, uint16_t port)
+//void PeerFinder::publish(QString hostname, uint16_t port, QString service)
+void PeerFinder::publish(QString hostname, int port, QString service)
 {
 	m_zeroconf->startServicePublish(hostname.toUtf8(), service.toUtf8(), "local", port);
 
@@ -63,13 +65,14 @@ void PeerFinder::printError(QZeroConf::error_t error) {
 QString PeerFinder::make_key(const QZeroConfService& service)
 {
 	// Do it like the QZeroConf resolveCallback...
-	return service.name() + QString::number(service.interfaceIndex());
+	return service.name() +
+		QNetworkInterface::interfaceFromIndex(service.interfaceIndex()).name();
 }
 
 QString PeerFinder::make_key(const Peer* peer)
 {
-	// Do it like the QZeroConf resolveCallback...
-	return peer->m_name + QString::number(peer->m_interfaceIndex);
+	// Identify entries by name and interface
+	return peer->m_name + peer->m_interface;
 }
 
 void PeerFinder::peerAdded(QZeroConfService service)
@@ -87,7 +90,11 @@ void PeerFinder::peerAdded(QZeroConfService service)
 	Peer* peer = new Peer;
 	peer->m_name = service.name();
 	peer->m_ip = service.ipv6();
-	peer->m_interfaceIndex = service.interfaceIndex();
+	peer->m_interface = QNetworkInterface::interfaceNameFromIndex(service.interfaceIndex());
+	peer->m_port = service.port();
+	qDebug() << "Found interface: " << peer->m_interface;
+	
+	qDebug() << "Found IP: " << peer->m_ip;
 	
 	QDataStream ds(service.txt()["status"]);
 	ds >> peer->m_status;
@@ -98,12 +105,13 @@ void PeerFinder::peerAdded(QZeroConfService service)
 
 void PeerFinder::peerUpdated(QZeroConfService service)
 {
-	qDebug() << "PeerFinder::peerUpdated" << service;
+	qDebug() << "PeerFinder::peerUpdated" << service << service.txt()["status"];
 	for (auto i: m_peerlist) {
 		Peer* p = static_cast<Peer*>(i);
 		if (make_key(p) == make_key(service)) {
 			QDataStream ds(service.txt()["status"]);
 			ds >> p->m_status;
+			Q_EMIT p->statusChanged();
 			Q_EMIT peersChanged();
 			return;
 		}
