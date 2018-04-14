@@ -16,6 +16,8 @@ webrtc_dep = dependency('webrtc', fallback: ['webrtc', 'webrtc_dep'])
 
 moc_headers = files(
     'peerfinder.h',
+    'coolsocket.h',
+    'simplepeerconnection.h'
     #'baresipcore.h',
     #'baresipvidisp.h',
 )
@@ -23,6 +25,8 @@ moc_headers = files(
 sources = files(
     'main.cpp',
     'peerfinder.cpp',
+    'coolsocket.cpp',
+    'simplepeerconnection.cpp'
     #'baresipcore.cpp',
     #'baresipvidisp.cpp',
     #'yuvtexturematerial.cpp',
@@ -31,7 +35,6 @@ sources = files(
 moc_files = qt5.preprocess(moc_headers: moc_headers)
 
 executable('ewindow', sources, moc_files,
-    #dependencies: [qwebrtc_dep, webrtc_dep, libgl, qtzeroconf_dep],
-    dependencies: [qtzeroconf_dep, qt5_dep, webrtc_dep],
+    dependencies: [qtzeroconf_dep, qt5_dep, qwebrtc_dep, webrtc_dep],
     cpp_args: '-DQT_NO_KEYWORDS'
 )

@@ -8,8 +8,8 @@
 
 #include <QDebug>
 
-
-#include <QHostAddress>
+#include <QNetworkConfigurationManager>
+#include <QTcpServer>
 
 /*
 #include <qwebrtcconfiguration.hpp>
@@ -25,11 +25,22 @@
 */
 
 #include "peerfinder.h"
+#include "coolsocket.h"
+#include "simplepeerconnection.h"
 
 
 void registerTypes() {
+	qRegisterMetaType<quint16>();
+	qRegisterMetaType<QHostAddress>();
+	
 	qmlRegisterType<PeerFinder>("org.ewindow", 0, 1, "PeerFinder");
 	qmlRegisterType<Peer>("org.ewindow", 0, 1, "Peer");
+	
+	qmlRegisterType<CoolSocket>("org.ewindow", 0, 1, "CoolSocket");
+
+	qmlRegisterType<SimplePeerConnection>("org.ewindow", 0, 1, "PeerConnection");
+	
+	qRegisterMetaType<QSharedPointer<QWebRTCSessionDescription>>();
 }
 
 int main(int argc, char *argv[])
@@ -42,8 +53,7 @@ int main(int argc, char *argv[])
 	QGuiApplication::setAttribute(Qt::AA_UseOpenGLES);
 	QGuiApplication app(argc, argv);
 
-	
-	app.setApplicationName("QtZeroConf Example");
+	app.setApplicationName("E - W I N D O W");
 	app.setApplicationVersion("0.1");
 
 	QQmlApplicationEngine engine;
@@ -56,53 +66,3 @@ int main(int argc, char *argv[])
 
 	return app.exec();
 }
-
-#if 0
-
-void doTheWebRTCDance() {
-	QWebRTCPeerConnectionFactory pc_factory;
-	QSharedPointer<QWebRTCMediaTrack> vt = pc_factory.createVideoTrack(QVariantMap(), "video");
-	QSharedPointer<QWebRTCMediaTrack> at = pc_factory.createAudioTrack(QVariantMap(), "audio");
-	
-	QSharedPointer<QWebRTCMediaStream> ms = pc_factory.createMediaStream("mystream");
-	ms->addTrack(at);
-	ms->addTrack(vt);
-
-	QWebRTCConfiguration rtcconf;
-
-	QSharedPointer<QWebRTCPeerConnection> pc = pc_factory.createPeerConnection(rtcconf);
-	pc->addStream(ms);
-	//pc->addTrack(vt);
-
-    auto remotedesc_callback = [] (bool result) {
-        qWarning() << "pc->setRemoteDescription: " << result;
-    };
-
-
-    // Fake createOffer to start ICE gathering..
-    pc->createOfferForConstraints(QVariantMap(), [pc] (auto offer){
-        qWarning() << "SDP fake offer";
-        pc->setLocalDescription(offer, [](bool b){
-            qWarning() << "SDP fake local description set";
-        });
-    });
-
-    while (pc->iceGatheringState() != QWebRTCPeerConnection::IceGatheringState::Complete) {
-        app.processEvents();
-    }
-
-
-    auto sdpprint = [pc, remotedesc_callback] (auto offer) {
-        qWarning() << "SDP offer:" << QString(offer->sdp());
-        pc->setLocalDescription(offer, [pc, offer, remotedesc_callback] (bool success) {
-            qWarning() << "pc->setLocalDescription: " << success;
-            pc->setRemoteDescription(offer, remotedesc_callback);
-        });
-    };
-
-	auto varmap = QVariantMap();
-    varmap["receiveAudio"] = true;
-    varmap["receiveVideo"] = true;
-	pc->createOfferForConstraints(varmap, sdpprint);
-#endif
-

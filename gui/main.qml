@@ -24,12 +24,47 @@ Window {
         id: zc
     }
 
+    ContactList {
+        id: cl
+        model: zc.model
+    }
+
+    CoolSocket {
+        id: cs
+    }
+
+    PeerConnection {
+        id: pca
+    }
+
+    /*
+    PeerConnection {
+        id: pcb
+    }
+    */
+
     Component.onCompleted: {
-        zc.publish("myfancyhostname")
+        var offer = pca.createOffer();
+        console.log(offer);
+        /*
+        pca.setLocalDescription(offer);
+
+        pcb.setRemoteDescription(offer);
+        var answer = pcb.setRemoteDescription();
+        console.log(answer);
+
+        pca.setRemoteDescription(answer);
+        */
+        /*
+        console.log("Determined port: ", typeof(cs.listenPort), cs.listenPort)
+        zc.publish("ewindow-" + Math.random(), cs.listenPort)
+
+        cl.contactSelected.connect(cs.connectTo)
+        * */
     }
 
     Timer {
-        interval: 30000
+        interval: 5000
         running: true
         repeat: true
 
@@ -38,11 +73,6 @@ Window {
         onTriggered: {
             zc.setStatus(counter++);
         }
-    }
-
-    ContactList {
-        id: cl
-        model: zc.model
     }
 
     FocusScope {
