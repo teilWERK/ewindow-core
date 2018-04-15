@@ -13,12 +13,10 @@ Window {
     width: 640
     height: 480
 
-/*
-    QWebRTCQuickVideoItem {
+    VideoItem {
         id: videoItem
         anchors.fill: parent   
-    }
-    * */
+    }    
 
     PeerFinder {
         id: zc
@@ -35,26 +33,40 @@ Window {
 
     PeerConnection {
         id: pca
+
+        onIceCandidate: pcb.addIceCandidate(candidate)
     }
 
-    /*
+    
     PeerConnection {
         id: pcb
+        
+        onIceCandidate: pca.addIceCandidate(candidate)
+
+        onVideoTrackAdded: videoItem.videoTrack = track
     }
-    */
+    
 
     Component.onCompleted: {
+        //pca.videoTrackAdded.connect(videoItem.setVideoTrack)
+        console.log("!!!QML!!! pca.createOffer")
         var offer = pca.createOffer();
         console.log(offer);
-        /*
+        
+        console.log("!!!QML!!! pca.setLocal", offer)
         pca.setLocalDescription(offer);
-
+        
+        console.log("!!!QML!!! pcb.setRemote", offer)
         pcb.setRemoteDescription(offer);
-        var answer = pcb.setRemoteDescription();
-        console.log(answer);
+        
+        console.log("!!!QML!!! pcb.createAnswer")
+        var answer = pcb.createAnswer();
+        console.log("!!!QML!!! pcb.setLocal", offer)
+        pcb.setLocalDescription(answer);
 
+        console.log("!!!QML!!! pca.setRemote", answer)
         pca.setRemoteDescription(answer);
-        */
+        
         /*
         console.log("Determined port: ", typeof(cs.listenPort), cs.listenPort)
         zc.publish("ewindow-" + Math.random(), cs.listenPort)

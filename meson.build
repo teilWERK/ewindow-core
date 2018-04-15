@@ -36,5 +36,6 @@ moc_files = qt5.preprocess(moc_headers: moc_headers)
 
 executable('ewindow', sources, moc_files,
     dependencies: [qtzeroconf_dep, qt5_dep, qwebrtc_dep, webrtc_dep],
-    cpp_args: '-DQT_NO_KEYWORDS'
+    cpp_args: '-DQT_NO_KEYWORDS',
+    link_args: '-lGL' # Hack, should use Qt's OpenGL wrapper
 )

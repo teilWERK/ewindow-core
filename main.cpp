@@ -8,21 +8,7 @@
 
 #include <QDebug>
 
-#include <QNetworkConfigurationManager>
-#include <QTcpServer>
-
-/*
-#include <qwebrtcconfiguration.hpp>
-#include <qwebrtcpeerconnectionfactory.hpp>
-#include <qwebrtcpeerconnection.hpp>
 #include <qwebrtcquickvideoitem.hpp>
-#include <qwebrtcmediastream.hpp>
-#include <qwebrtcmediatrack.hpp>
-
-
-#include "baresipcore.h"
-#include "baresipvidisp.h"
-*/
 
 #include "peerfinder.h"
 #include "coolsocket.h"
@@ -39,7 +25,9 @@ void registerTypes() {
 	qmlRegisterType<CoolSocket>("org.ewindow", 0, 1, "CoolSocket");
 
 	qmlRegisterType<SimplePeerConnection>("org.ewindow", 0, 1, "PeerConnection");
-	
+
+	qmlRegisterType<QWebRTCQuickVideoItem>("org.ewindow", 0, 1, "VideoItem");
+
 	qRegisterMetaType<QSharedPointer<QWebRTCSessionDescription>>();
 }
 

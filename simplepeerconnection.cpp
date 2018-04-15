@@ -3,20 +3,26 @@
 #include <qwebrtcpeerconnection.hpp>
 #include <qwebrtcpeerconnectionfactory.hpp>
 #include <qwebrtcmediastream.hpp>
+#include <qwebrtcmediatrack.hpp>
 #include <qwebrtcconfiguration.hpp>
 
 #include <QDebug>
 #include <QCoreApplication>
 
+#include <unistd.h>
+
 
 SimplePeerConnection::SimplePeerConnection()
 {
     QWebRTCPeerConnectionFactory pc_factory;
+    //QSharedPointer<QWebRTCMediaTrack> vt = pc_factory.createVideoTrack(QVariantMap(), "myvideo");
+    //QSharedPointer<QWebRTCMediaTrack> at = pc_factory.createAudioTrack(QVariantMap(), "myaudio");
     QSharedPointer<QWebRTCMediaTrack> vt = pc_factory.createVideoTrack(QVariantMap(), "video");
-    QSharedPointer<QWebRTCMediaTrack> at = pc_factory.createAudioTrack(QVariantMap(), "audio");
+    //QSharedPointer<QWebRTCMediaTrack> at = pc_factory.createAudioTrack(QVariantMap(), "audio");
+
 
     QSharedPointer<QWebRTCMediaStream> ms = pc_factory.createMediaStream("mystream");
-    ms->addTrack(at);
+    //ms->addTrack(at);
     ms->addTrack(vt);
     
     QWebRTCConfiguration rtcconf;
@@ -26,10 +32,25 @@ SimplePeerConnection::SimplePeerConnection()
     //pc->addTrack(vt);
 
     m_pc = pc;
+
+    connect(pc.data(), &QWebRTCPeerConnection::streamAdded, this, &SimplePeerConnection::mediaStreamAdded);
+    connect(pc.data(), &QWebRTCPeerConnection::newIceCandidate, this, &SimplePeerConnection::gotIceCandidate);
 }
 
 SimplePeerConnection::~SimplePeerConnection()
 {
+}
+
+void SimplePeerConnection::mediaStreamAdded(const QSharedPointer<QWebRTCMediaStream>& stream)
+{
+    qWarning() << "SimplePeerConnection: new media stream" << stream;
+
+    for (auto track : stream->tracks()) {
+        if (track->trackType() == QWebRTCMediaTrack::Type::Video) {
+            Q_EMIT videoTrackAdded(track.data());
+            return;
+        }
+    }
 }
 
 QSharedPointer<QWebRTCSessionDescription> SimplePeerConnection::createOffer()
@@ -42,9 +63,9 @@ QSharedPointer<QWebRTCSessionDescription> SimplePeerConnection::createOffer()
         });*/
     });
 
-    while (m_pc->iceGatheringState() != QWebRTCPeerConnection::IceGatheringState::Complete) {
+    //while (m_pc->iceGatheringState() != QWebRTCPeerConnection::IceGatheringState::Complete) {
         QCoreApplication::processEvents();
-    }
+    //}
     QSharedPointer<QWebRTCSessionDescription> sdp;
     auto sdpprint = [this, &sdp](auto sdp_) {
 	//Q_EMIT(this->gotOfferSDP(sdp));
@@ -57,6 +78,8 @@ QSharedPointer<QWebRTCSessionDescription> SimplePeerConnection::createOffer()
     m_pc->createOfferForConstraints(varmap, sdpprint);
 
     while (!sdp);
+
+    qInfo() << "createOffer SDP: " << sdp->sdp();
     return sdp;
 }
 
@@ -71,9 +94,9 @@ QSharedPointer<QWebRTCSessionDescription> SimplePeerConnection::createAnswer()
         });*/
     });
 
-    while (m_pc->iceGatheringState() != QWebRTCPeerConnection::IceGatheringState::Complete) {
-        QCoreApplication::processEvents();
-    }
+    //while (m_pc->iceGatheringState() != QWebRTCPeerConnection::IceGatheringState::Complete) {
+      //  QCoreApplication::processEvents();
+    //}
 
     QSharedPointer<QWebRTCSessionDescription> sdp;
     auto sdpprint = [this, &sdp](auto sdp_) {
@@ -84,7 +107,7 @@ QSharedPointer<QWebRTCSessionDescription> SimplePeerConnection::createAnswer()
     auto varmap = QVariantMap();
     varmap["receiveAudio"] = true;
     varmap["receiveVideo"] = true;
-    m_pc->createOfferForConstraints(varmap, sdpprint);
+    m_pc->createAnswerForConstraints(varmap, sdpprint);
 
     while (!sdp);
     return sdp;
@@ -97,7 +120,7 @@ bool SimplePeerConnection::setLocalDescription(QSharedPointer<QWebRTCSessionDesc
     bool waiting = true;
     int result;
     auto setlocal_callback = [&waiting, &result] (bool _result) {
-        qWarning() << "pc->setRemoteDescription: " << result;
+        qWarning() << "pc->setLocalDescription: " << result;
         waiting = false;
         result = _result;
     };
@@ -113,7 +136,7 @@ bool SimplePeerConnection::setRemoteDescription(QSharedPointer<QWebRTCSessionDes
     bool waiting = true;
     int result;
     auto remotedesc_callback = [&waiting, &result] (bool _result) {
-        qWarning() << "pc->setRemoteDescription: " << result;
+        qWarning() << "pc->setRemoteDescription: " << _result;
 	waiting = false;
 	result = _result;
     };
@@ -122,4 +145,15 @@ bool SimplePeerConnection::setRemoteDescription(QSharedPointer<QWebRTCSessionDes
 
     while (waiting);
     return result;
+}
+
+void SimplePeerConnection::addIceCandidate(const QSharedPointer<QWebRTCIceCandidate>& candidate)
+{
+    m_pc->addIceCandidate(candidate);
+}
+
+void SimplePeerConnection::gotIceCandidate(const QSharedPointer<QWebRTCIceCandidate>& candidate)
+{
+    usleep(1);
+    Q_EMIT(iceCandidate(candidate));
 }

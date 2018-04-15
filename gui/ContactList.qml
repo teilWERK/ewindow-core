@@ -10,6 +10,8 @@ ListView {
 
     delegate: contactDelegate
 
+    signal contactSelected(variant ip, int port)
+
     highlight: Rectangle {
         color: "blue"
         radius: 5
@@ -41,7 +43,8 @@ ListView {
                anchors.fill: parent
                onClicked: {
                    if (index == listView.currentIndex) {
-                       contactSelected(ip)
+                       //contactSelected(model)
+                       contactSelected(ip, port)
                    }
 
                    listView.currentIndex = index
@@ -63,26 +66,33 @@ ListView {
             }
 
             Rectangle {
-            anchors.verticalCenter: parent.verticalCenter
-            x: y
-            width: parent.height / 4
-            height: width
-            radius: width
+                anchors.verticalCenter: parent.verticalCenter
+                x: y
+                width: parent.height / 4
+                height: width
+                radius: width
 
-            color: status != 0 ? "green" : "red"
+                color: status != 0 ? "green" : "red"
             }
 
-            Text {
-                text: name
-
-                anchors { left: idLogo.right;
+            Row {
+                anchors {
+                    left: idLogo.right;
                     right: parent.right
                 }
 
-                verticalAlignment: Text.AlignHCenter
-                horizontalAlignment: Text.AlignHCenter
-                font.pixelSize: 100
-                fontSizeMode: Text.HorizontalFit
+                Text {
+                    //text: model.name
+
+                    verticalAlignment: Text.AlignHCenter
+                    horizontalAlignment: Text.AlignHCenter
+                    font.pixelSize: 100
+                    fontSizeMode: Text.HorizontalFit
+                }
+
+                Text {
+                    text: name + model.status + model.ip.toString() + model.port + model.interface
+                }
             }
         }
     }

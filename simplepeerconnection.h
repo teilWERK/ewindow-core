@@ -2,6 +2,8 @@
 #include <QSharedPointer>
 
 #include <qwebrtcsessiondescription.hpp>
+#include <qwebrtcmediastream.hpp>
+#include <qwebrtcicecandidate.hpp>
 
 class QWebRTCPeerConnection;
 
@@ -22,9 +24,15 @@ public Q_SLOTS:
     bool setLocalDescription(QSharedPointer<QWebRTCSessionDescription>);
     bool setRemoteDescription(QSharedPointer<QWebRTCSessionDescription>);
 
+    void addIceCandidate(const QSharedPointer<QWebRTCIceCandidate>& candidate);
+
+private Q_SLOTS:
+    void mediaStreamAdded(const QSharedPointer<QWebRTCMediaStream>&);
+    void gotIceCandidate(const QSharedPointer<QWebRTCIceCandidate>&);
+
 Q_SIGNALS:
-    void gotOfferSDP(QSharedPointer<QWebRTCSessionDescription>);
-    void gotAnswerSDP(QSharedPointer<QWebRTCSessionDescription>);
+    void videoTrackAdded(QObject* track);
+    void iceCandidate(const QSharedPointer<QWebRTCIceCandidate>& candidate);
 
 private:
     QSharedPointer<QWebRTCPeerConnection> m_pc;
