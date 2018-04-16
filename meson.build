@@ -16,6 +16,7 @@ webrtc_dep = dependency('webrtc', fallback: ['webrtc', 'webrtc_dep'])
 
 moc_headers = files(
     'peerfinder.h',
+    'peerlist.h',
     'coolsocket.h',
     'simplepeerconnection.h'
     #'baresipcore.h',
@@ -25,6 +26,7 @@ moc_headers = files(
 sources = files(
     'main.cpp',
     'peerfinder.cpp',
+    'peerlist.cpp',
     'coolsocket.cpp',
     'simplepeerconnection.cpp'
     #'baresipcore.cpp',

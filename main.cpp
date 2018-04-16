@@ -10,6 +10,7 @@
 
 #include <qwebrtcquickvideoitem.hpp>
 
+#include "peerlist.h"
 #include "peerfinder.h"
 #include "coolsocket.h"
 #include "simplepeerconnection.h"
@@ -20,7 +21,8 @@ void registerTypes() {
 	qRegisterMetaType<QHostAddress>();
 	
 	qmlRegisterType<PeerFinder>("org.ewindow", 0, 1, "PeerFinder");
-	qmlRegisterType<Peer>("org.ewindow", 0, 1, "Peer");
+	qmlRegisterType<PeerList>("org.ewindow", 0, 1, "PeerList");
+	qmlRegisterInterface<Peer>("Peer");
 	
 	qmlRegisterType<CoolSocket>("org.ewindow", 0, 1, "CoolSocket");
 
