@@ -1,7 +1,6 @@
 #include "peerlist.h"
 #include "qzeroconf.h"
 
-#include <QDataStream>
 #include <QNetworkInterface>
 
 #include <QMetaProperty>
@@ -13,8 +12,7 @@ Peer::Peer(QZeroConfService& service)
 	m_interface = QNetworkInterface::interfaceNameFromIndex(service.interfaceIndex());
 	m_port = service.port();
 	
-	QDataStream ds(service.txt()["status"]);
-	ds >> m_status;
+	m_status = QString(service.txt()["status"]).toInt();
 }
 
 PeerList::PeerList(QObject* parent)

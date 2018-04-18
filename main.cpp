@@ -30,7 +30,9 @@ void registerTypes() {
 
 	qmlRegisterType<QWebRTCQuickVideoItem>("org.ewindow", 0, 1, "VideoItem");
 
+	qmlRegisterInterface<QWebRTCSessionDescription>("SessionDescription");
 	qRegisterMetaType<QSharedPointer<QWebRTCSessionDescription>>();
+	//qRegisterMetaType<QWebRTCSessionDescription>();
 }
 
 int main(int argc, char *argv[])

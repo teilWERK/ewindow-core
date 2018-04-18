@@ -2,10 +2,6 @@ import QtQuick 2.7
 import QtQuick.Window 2.2
 
 import org.ewindow 0.1
-//import org.ewindow.webrtc 0.1
-//import org.ewindow.ua 0.1
-
-//import "logic.js" as Logic
 
 Window {
     id: mainWindow
@@ -25,67 +21,52 @@ Window {
     ContactList {
         id: cl
         model: zc.model
+
+        visible: true
+        opacity: 0.2
     }
 
     CoolSocket {
         id: cs
+
+        onReceivedOffer: {
+            console.log("QML!!! received offer")
+            pca.setRemoteDescription(sdp);
+            var sdp = pca.createAnswer();
+            pca.setLocalDescription(sdp);
+            console.log("QML!!! sending Answer ", sdp)
+            sendAnswer(sdp);
+        }
+
+        onReceivedAnswer: {
+            pca.setRemoteDescription(sdp)
+        }
     }
+
 
     PeerConnection {
         id: pca
 
-        onIceCandidate: pcb.addIceCandidate(candidate)
-    }
-
-    
-    PeerConnection {
-        id: pcb
-        
-        onIceCandidate: pca.addIceCandidate(candidate)
-
+        //onIceCandidate: pcb.addIceCandidate(candidate)
         onVideoTrackAdded: videoItem.videoTrack = track
     }
-    
 
     Component.onCompleted: {
-        //pca.videoTrackAdded.connect(videoItem.setVideoTrack)
-        console.log("!!!QML!!! pca.createOffer")
-        var offer = pca.createOffer();
-        console.log(offer);
-        
-        console.log("!!!QML!!! pca.setLocal", offer)
-        pca.setLocalDescription(offer);
-        
-        console.log("!!!QML!!! pcb.setRemote", offer)
-        pcb.setRemoteDescription(offer);
-        
-        console.log("!!!QML!!! pcb.createAnswer")
-        var answer = pcb.createAnswer();
-        console.log("!!!QML!!! pcb.setLocal", offer)
-        pcb.setLocalDescription(answer);
-
-        console.log("!!!QML!!! pca.setRemote", answer)
-        pca.setRemoteDescription(answer);
-        
-        /*
         console.log("Determined port: ", typeof(cs.listenPort), cs.listenPort)
-        zc.publish("ewindow-" + Math.random(), cs.listenPort)
-
-        cl.contactSelected.connect(cs.connectTo)
-        * */
+        zc.setStatus(1)
+        zc.publish("ewindow-" + Math.floor(Math.random()* 10000), cs.listenPort)
+        
+        cl.contactSelected.connect(function (ip, port) {
+            console.log("!!!QML!!! pca.createOffer")
+            var offer = pca.createOffer();
+            pca.setLocalDescription(offer);
+            cs.connectTo(ip, port, offer);
+            //cs.connectTo(ip, 5555, offer);
+        })
+        return 
+        
     }
 
-    Timer {
-        interval: 5000
-        running: true
-        repeat: true
-
-        property var counter: 0
-
-        onTriggered: {
-            zc.setStatus(counter++);
-        }
-    }
 
     FocusScope {
         focus: true

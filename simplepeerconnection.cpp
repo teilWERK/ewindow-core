@@ -15,14 +15,11 @@
 SimplePeerConnection::SimplePeerConnection()
 {
     QWebRTCPeerConnectionFactory pc_factory;
-    //QSharedPointer<QWebRTCMediaTrack> vt = pc_factory.createVideoTrack(QVariantMap(), "myvideo");
-    //QSharedPointer<QWebRTCMediaTrack> at = pc_factory.createAudioTrack(QVariantMap(), "myaudio");
-    QSharedPointer<QWebRTCMediaTrack> vt = pc_factory.createVideoTrack(QVariantMap(), "video");
-    //QSharedPointer<QWebRTCMediaTrack> at = pc_factory.createAudioTrack(QVariantMap(), "audio");
-
-
+    QSharedPointer<QWebRTCMediaTrack> vt = pc_factory.createVideoTrack(QVariantMap(), "myvideo");
+    QSharedPointer<QWebRTCMediaTrack> at = pc_factory.createAudioTrack(QVariantMap(), "myaudio");
     QSharedPointer<QWebRTCMediaStream> ms = pc_factory.createMediaStream("mystream");
-    //ms->addTrack(at);
+    
+    ms->addTrack(at);
     ms->addTrack(vt);
     
     QWebRTCConfiguration rtcconf;
@@ -54,18 +51,19 @@ void SimplePeerConnection::mediaStreamAdded(const QSharedPointer<QWebRTCMediaStr
 }
 
 QSharedPointer<QWebRTCSessionDescription> SimplePeerConnection::createOffer()
-{
+{    
     // Fake createOffer to start ICE gathering..
-    m_pc->createOfferForConstraints(QVariantMap(), [] (auto offer){
-        /*qWarning() << "SDP fake offer";
-        pc->setLocalDescription(offer, [](bool b){
-            qWarning() << "SDP fake local description set";
-        });*/
+    m_pc->createOfferForConstraints(QVariantMap(), [this] (auto offer){
+        qWarning() << "SDP fake offer";
+        m_pc->setLocalDescription(offer, [](bool b){
+            qWarning() << "SDP fake local description set" << b;
+        });
     });
-
-    //while (m_pc->iceGatheringState() != QWebRTCPeerConnection::IceGatheringState::Complete) {
+    
+    while (m_pc->iceGatheringState() != QWebRTCPeerConnection::IceGatheringState::Complete) {
         QCoreApplication::processEvents();
-    //}
+    }
+    
     QSharedPointer<QWebRTCSessionDescription> sdp;
     auto sdpprint = [this, &sdp](auto sdp_) {
 	//Q_EMIT(this->gotOfferSDP(sdp));
@@ -77,26 +75,27 @@ QSharedPointer<QWebRTCSessionDescription> SimplePeerConnection::createOffer()
     varmap["receiveVideo"] = true;
     m_pc->createOfferForConstraints(varmap, sdpprint);
 
-    while (!sdp);
+    while (!sdp); // TODO: Handle errors in SDP creation
 
-    qInfo() << "createOffer SDP: " << sdp->sdp();
     return sdp;
 }
 
 
 QSharedPointer<QWebRTCSessionDescription> SimplePeerConnection::createAnswer()
 {
+    /*
     // Fake createAnswer to start ICE gathering..
-    m_pc->createAnswerForConstraints(QVariantMap(), [] (auto offer){
-        /*qWarning() << "SDP fake offer";
-        pc->setLocalDescription(offer, [](bool b){
-            qWarning() << "SDP fake local description set";
-        });*/
+    m_pc->createAnswerForConstraints(QVariantMap(), [this] (auto answer){
+        qWarning() << "SDP fake answer";
+        m_pc->setLocalDescription(answer, [](bool b){
+            qWarning() << "SDP fake local description set" << b;
+        });
     });
 
-    //while (m_pc->iceGatheringState() != QWebRTCPeerConnection::IceGatheringState::Complete) {
-      //  QCoreApplication::processEvents();
-    //}
+    while (m_pc->iceGatheringState() != QWebRTCPeerConnection::IceGatheringState::Complete) {
+        QCoreApplication::processEvents();
+    }
+    * */
 
     QSharedPointer<QWebRTCSessionDescription> sdp;
     auto sdpprint = [this, &sdp](auto sdp_) {
@@ -116,7 +115,7 @@ QSharedPointer<QWebRTCSessionDescription> SimplePeerConnection::createAnswer()
 
 
 bool SimplePeerConnection::setLocalDescription(QSharedPointer<QWebRTCSessionDescription> sdp)
-{
+{   
     bool waiting = true;
     int result;
     auto setlocal_callback = [&waiting, &result] (bool _result) {
