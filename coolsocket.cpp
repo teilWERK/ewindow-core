@@ -14,11 +14,15 @@ CoolSocket::CoolSocket(QObject* parent)
 
     m_server.listen();
     connect(&m_server, &QTcpServer::newConnection, this, &CoolSocket::handleConnection);
+
+    m_socket = nullptr;
 }
 
 CoolSocket::~CoolSocket()
 {
-    delete m_socket;
+    if (m_socket) {
+        delete m_socket;
+    }
 }
 
 
@@ -30,7 +34,6 @@ quint16 CoolSocket::listenPort()
 void CoolSocket::handleConnection()
 {
     QTcpSocket* socket = m_server.nextPendingConnection();
-    connect(socket, &QTcpSocket::readyRead, this, &CoolSocket::readyRead);
     
     qDebug() << "handleConnection" << socket;
 
@@ -38,9 +41,13 @@ void CoolSocket::handleConnection()
     // TODO: Handle the case of mutual auto-connects
     if (m_socket) {
         delete socket; // Delete the new connection
+        return;
     } else {
         m_socket = socket;
     }
+    
+    connect(m_socket, &QTcpSocket::readyRead, this, &CoolSocket::readyRead);
+    connect(m_socket, &QTcpSocket::disconnected, this, &CoolSocket::peerDisconnected);
 
     // Call readyRead to close the connect gap
     readyRead();
@@ -54,6 +61,7 @@ void CoolSocket::connectTo(QHostAddress ip, int port, QSharedPointer<QWebRTCSess
     }
     m_socket = new QTcpSocket;
     connect(m_socket, &QTcpSocket::readyRead, this, &CoolSocket::readyRead);
+    connect(m_socket, &QTcpSocket::disconnected, this, &CoolSocket::peerDisconnected);
     qDebug() << "CoolSocket connecting to " << ip << ":" << port;
     m_socket->connectToHost(ip, port);
     m_socket->write(sdp->sdp());
@@ -89,4 +97,12 @@ void CoolSocket::readyRead()
             Q_EMIT receivedAnswer(m_socket->peerAddress(), m_socket->peerPort(), sdp);
         }
     }
+}
+
+void CoolSocket::peerDisconnected() {
+    qInfo() << "CoolSocket::peerDisconnected";
+    sender()->deleteLater();
+    m_socket = nullptr;
+
+     Q_EMIT(disconnected());
 }

@@ -23,7 +23,7 @@ Window {
         model: zc.model
 
         visible: true
-        opacity: 0.2
+        opacity: 0.5
     }
 
     CoolSocket {
@@ -36,10 +36,17 @@ Window {
             pca.setLocalDescription(sdp);
             console.log("QML!!! sending Answer ", sdp)
             sendAnswer(sdp);
+            zc.setStatus(0)
         }
 
         onReceivedAnswer: {
             pca.setRemoteDescription(sdp)
+        }
+
+        onDisconnected: {
+            console.log("QML: Peer disconnected")
+            pca.close();
+            zc.setStatus(1);
         }
     }
 
@@ -61,6 +68,7 @@ Window {
             var offer = pca.createOffer();
             pca.setLocalDescription(offer);
             cs.connectTo(ip, port, offer);
+            zc.setStatus(0)
             //cs.connectTo(ip, 5555, offer);
         })
         return 

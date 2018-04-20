@@ -24,11 +24,14 @@ public Q_SLOTS:
 private Q_SLOTS:
     void handleConnection();
     void readyRead();
+    void peerDisconnected();
+    //void socketError();
 
 Q_SIGNALS:
     void portChanged();
     void receivedOffer(QHostAddress send, int sender_port, QSharedPointer<QWebRTCSessionDescription> sdp);
     void receivedAnswer(QHostAddress send, int sender_port, QSharedPointer<QWebRTCSessionDescription> sdp);
+    void disconnected();
 
 private:
     //void incomingConnection(qintptr socketDescriptor);

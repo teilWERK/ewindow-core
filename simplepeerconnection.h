@@ -6,6 +6,7 @@
 #include <qwebrtcicecandidate.hpp>
 
 class QWebRTCPeerConnection;
+class QWebRTCPeerConnectionFactory;
 
 // QML friendly wrapper of QWebRTCConnection
 
@@ -26,6 +27,8 @@ public Q_SLOTS:
 
     void addIceCandidate(const QSharedPointer<QWebRTCIceCandidate>& candidate);
 
+    void close();
+
 private Q_SLOTS:
     void mediaStreamAdded(const QSharedPointer<QWebRTCMediaStream>&);
     void gotIceCandidate(const QSharedPointer<QWebRTCIceCandidate>&);
@@ -35,7 +38,11 @@ Q_SIGNALS:
     void iceCandidate(const QSharedPointer<QWebRTCIceCandidate>& candidate);
 
 private:
+    void createPeerConnection();
+
     QSharedPointer<QWebRTCPeerConnection> m_pc;
+    QSharedPointer<QWebRTCPeerConnectionFactory> m_pc_factory;
+    QSharedPointer<QWebRTCMediaStream> m_mediaStream;
 };
 
 Q_DECLARE_METATYPE(QSharedPointer<QWebRTCSessionDescription>)
